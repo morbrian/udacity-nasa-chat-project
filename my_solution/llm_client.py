@@ -42,6 +42,8 @@ def generate_response(openai_key: str, user_message: str, context: str,
         print(f"ERROR: Unknown client key type: {openai_key}")
         print("Expected key types start with 'sk-' or 'voc-'")
         sys.exit()
+    
+    print(f"SENDING: {augmented_history}")
 
     # DONE: Send request to OpenAI
     response = openai_client.chat.completions.create(
