@@ -101,7 +101,7 @@ class TranscriptProcessor:
             enriched_content = self.expander.process_text(content)
 
             yield {
-                "embedding_text": f"{timestamp} {enriched_speaker}: {enriched_content}",
+                "enriched_text": f"{timestamp} {enriched_speaker}: {enriched_content}",
                 "metadata": metadata | {
                     "timestamp": timestamp,
                     "speaker_raw": speaker,
@@ -212,7 +212,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 
         return title_page, introduction_text, acronym_text, transcript_text
 
-    def generic_chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    def generic_chunk_text(self, text: str, metadata: Dict[str, Any], position_start=0) -> List[Tuple[str, Dict[str, Any]]]:
         """
         Split text into chunks with metadata
         
@@ -248,7 +248,7 @@ class ChromaEmbeddingPipelineTextOnly:
             while index < len(sentences):
                 # DONE: Implement chunking logic with overlap
                 if (index < 5 or index % 100 == 0 or index == len(sentences) - 1):
-                    logger.info(f"{logger_prefix} Chunk sentence {index} of {len(sentences)}")
+                    logger.debug(f"{logger_prefix} Chunk sentence {index} of {len(sentences)}")
 
                 # get an overlap_size amount of previous tokens
                 previous_chunk = chunks[-1] if len(chunks) > 0 else []
@@ -259,7 +259,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 remaining_tokens = self.local_encoding.encode(current_sentence)
 
                 if (index < 5 or index % 100 == 0 or index == len(sentences) - 1):
-                    logger.info(f"{logger_prefix} Current Sentence: {current_sentence}")
+                    logger.debug(f"{logger_prefix} Current Sentence: {current_sentence}")
                 
                 # start building a new chunk, padded with the overlap from previous tokens
                 building_chunks = []
@@ -282,7 +282,7 @@ class ChromaEmbeddingPipelineTextOnly:
                     chunks.append(trailing_chunk)
                 
                 index += 1
-            logger.info(f"{logger_prefix} Completed Chunking Total of ({len(sentences)}) sentences")
+            logger.debug(f"{logger_prefix} Completed Chunking Total of ({len(sentences)}) sentences")
 
         enriched_chunks = []
         for i, chunk in enumerate(chunks):
@@ -290,7 +290,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 self.local_encoding.decode(chunk),
                 metadata | {
                     "token_count": len(chunk),
-                    "position": i
+                    "position": position_start + i
                 }
             ))
 
@@ -324,9 +324,6 @@ class ChromaEmbeddingPipelineTextOnly:
             )
 
             summary_text = response.choices[0].message.content
-
-            logger.info(f"BCM: SUMMARY CONTENT: {summary_text}")
-
             token_check = self.local_encoding.encode(summary_text)
             if (len(token_check) > size):
                 logger.warning(f'Content summary created by OpenAI exceeds the requested {size} tokens at {len(token_check)} tokens instead')
@@ -379,7 +376,7 @@ The result must be well formed JSON with no other text formatting or markup.
 
             content = response.choices[0].message.content
 
-            logger.info(f"ACRONYM CONTENT: {content}")
+            logger.debug(f"ACRONYM CONTENT: {content}")
 
             json_data = json.loads(content)
 
@@ -426,7 +423,7 @@ The result must be well formed JSON with no other text formatting or markup.
         logger_prefix = self.get_metadata_log_prefix(metadata)
         logger.info(f"{logger_prefix} Begin processing transcript")
         chunk_size = self.parameters['chunk_size']
-        chunk_overlap = self.parameters['chunk_overlap']
+        position_tracker = 0
 
 
         # Split text into sections of the transcript type of document.
@@ -446,6 +443,7 @@ The result must be well formed JSON with no other text formatting or markup.
             }
         )
         chunks.append(chunk)
+        position_tracker = len(chunks)
 
         # create one summary for each paragraph as detected by consecutive newlines
         # NOTE: this summary approach was a clever idea, pat myself on back, but...
@@ -462,21 +460,23 @@ The result must be well formed JSON with no other text formatting or markup.
         #         metadata | {
         #             "section": "intro",
         #             "token_count": len(self.local_encoding.encode(paragraph)),
-        #             "embedding_text": summary
+        #             "enriched_text": summary
         #         }
         #     ))
 
         # do a generic chunking on the introduction text
         logger.info(f"{logger_prefix} Extract Introduction")
         intro_metadata = metadata | { "section": "introduction" }
-        intro_chunks = self.generic_chunk_text(intro_text, intro_metadata)
+        intro_chunks = self.generic_chunk_text(intro_text, intro_metadata, position_start=position_tracker)
         chunks.extend(intro_chunks)
+        position_tracker = len(chunks)
 
         # do a generic chunking on the acronyms section
         logger.info(f"{logger_prefix} Extract Acronym text")
         acronym_metadata = metadata | { "section": "acronymn" }
-        acronym_chunks = self.generic_chunk_text(acronym_text, acronym_metadata)
+        acronym_chunks = self.generic_chunk_text(acronym_text, acronym_metadata, position_start=position_tracker)
         chunks.extend(acronym_chunks)
+        position_tracker = len(chunks)
 
         # build a dictionary representation of the acronyms we can use to enrich the logs during processing
         logger.info(f"{logger_prefix} Build Acronym lookup table")
@@ -497,26 +497,32 @@ The result must be well formed JSON with no other text formatting or markup.
         for record in transcript_processor.process_transcript(log_text, log_metadata):
             count += 1
             record_buffer.append(record)
+
+            if (count % 100 == 0):
+                logger.info(f"{logger_prefix} Extracting transcript record ({count}) enriched text: {record.get("enriched_text")}")
+
             if len(record_buffer) < bundle_threshhold:
                 continue
             else:
-                combined_text = "\n".join([record.get("embedding_text") for record in record_buffer])
+                combined_text = "\n".join([record.get("enriched_text") for record in record_buffer])
                 bundle_chunks = self.generic_chunk_text(
                     combined_text,
-                    metadata | { "section": "transcript" }
+                    metadata | { "section": "transcript" },
+                    position_start=position_tracker
                 )
                 chunks.extend(bundle_chunks)
+                position_tracker = len(chunks)
                 record_buffer = record_buffer[bundle_padding:]
-                if (count % (bundle_threshhold * 10) == 0):
-                    logger.info(f"{logger_prefix} Processed Transcript ({count}) with bundle ({count / bundle_threshhold})")
 
         # clear whatever is left over in the buffer
-        combined_text = "\n".join([record.get("embedding_text") for record in record_buffer])
+        combined_text = "\n".join([record.get("enriched_text") for record in record_buffer])
         bundle_chunks = self.generic_chunk_text(
             combined_text,
-            metadata | { "section": "transcript" }
+            metadata | { "section": "transcript" },
+            position_start=position_tracker
         )
         chunks.extend(bundle_chunks)
+        position_tracker = len(chunks)
 
         # TODO: my approach above tries to stay inside the chunk_size requirement
         #       which sort of loses the ability to keep both the original_text and enriched_text at the same time.
