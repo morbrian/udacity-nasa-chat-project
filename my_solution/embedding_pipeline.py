@@ -366,7 +366,7 @@ The result must be well formed JSON with no other text formatting or markup.
              "content": "\n".join(clean_lines)
         }
 
-        logging.info(f"USER_PROMPT: {user_prompt}")
+        logging.debug(f"USER_PROMPT: {user_prompt}")
         try:
             response = self.openai_client.chat.completions.create(
                 model=model,
@@ -498,7 +498,7 @@ The result must be well formed JSON with no other text formatting or markup.
             count += 1
             record_buffer.append(record)
 
-            if (count % 100 == 0):
+            if (count % 500 == 0):
                 logger.info(f"{logger_prefix} Extracting transcript record ({count}) enriched text: {record.get("enriched_text")}")
 
             if len(record_buffer) < bundle_threshhold:
@@ -916,9 +916,10 @@ The result must be well formed JSON with no other text formatting or markup.
                 )
                 if updated:
                     stats['updated'] += 1
-                    logger.debug(f"{logger_prefix} [doc_id({doc_id})] UPDATE {i}-of-{document_count}: modified existing document")
+                    logger.debug(f"{logger_prefix}  UPDATE {i}-of-{document_count}: modified existing document")
             else:
                 #   - Get embedding
+                logger.info(f"{logger_prefix} [doc_id({doc_id})] Fetch Embedding {i} of {document_count}: {doc_text}")
                 embedding = self.get_embedding(doc_text)
                 batch_tracker['count'] += 1
                 batch_tracker['ids'].append(doc_id)
