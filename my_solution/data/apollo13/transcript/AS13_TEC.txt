@@ -1,0 +1,1001 @@
+
+
+
+
+
+
+
+
+NATIONAL AERONAUTICS AND SPACE ADMINISTRATION
+
+
+
+
+
+
+
+APOLLO 13
+
+TECHNICAL AIR-TO-GROUND VOICE TRANSCRIPTION
+
+
+
+
+
+
+Prepared by Test Division Apollo Spacecraft Program Office
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SPACECRAFT CENTER
+HO US ION.TEX AS April 1970
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+INTRODUCTION
+
+This is the transcription of the technical air-to-ground (TAG) voice communications of the Apollo 13 mission. The primary communications net (GOSS net l) will be in continuous operation for the duration of the mission. An alternate communications net (GOSS net 2) may be activated when separate, simultaneous communications links with both spacecraft are desired.
+
+The transcript is divided into three columns -- time, speaker, and text. The time column consists of four two-digit pairs for days, hours, minutes, and seconds (e.g., 04 22 45 12). The speaker column indicates the source of a transmission; the text column contains the verbatim transcript of the communications.
+
+The primary communications net (GOSS net l) comprises the bulk of the transcript. However, when GOSS net 2 is activated, the communications on that net will be integrated with the GOSS net 1 communications. A heavy dark line alongside the time column will indicate GOSS net 2 communications.
+
+A series of three dots (...) is used to designate those portions of the text that could not be transcribed because of garbling. A series of three asterisks (***) is used to designate those portions of the text that could not be transcribed because of clipping caused by the VOX mode. One dash (-) is used to indicate a speaker's pause or a self-interruption and subsequent completion of a thought. Two dashes (- -) are used to indicate an interruption by another speaker or the point at which a recording was abruptly terminated.
+
+Speakers in the transcript may be identified as follows.
+Spacecraft:
+CDR                Commander            James A. (Jim) Lovell, Jr.
+CMP                Command module pilot    John L. Swigert, Jr.
+LMP                Lunar module pilot    Fred W. Haise, Jr.
+SC                Unidentified crewmember
+MS                Multiple speakers
+Mission Control Centers:
+CC                Capsule communicator (CAP COMM)
+LCC                Launch Control Center
+F                Flight director
+S                Surgeon
+Remote sites:
+AB                Airboss (Recovery aircraft)
+CT                Communications technician (COMM TECH)
+IWO                USS Iwo Jima
+P-l, P-2, etc.            Photographic helicopters
+R-l, R-2, etc.            Recovery helicopters
+
+When the CDR and LMP are in the undocked lunar module or on the lunar surface, their speaker designations will be suffixed by either LM or EVA to indicate their status (e.g., CDR-EVA or LMP-LM). Voice calls during this mission were assigned in accordance with the following station operating procedures: "For all phases when only the CSM is manned, the AS-508 call sign will be Apollo 13. When both vehicles are manned, the call sign will be Odyssey for the CSM and Aquarius for the LM. The call signs for the CDR and LMP during lunar surface operations will be the individual crew's first names."
+Transcription of these tapes was managed by David M. Goldenbaum, Test Division, Apollo Spacecraft Program Office, to whom questions regarding this document should be referred.
+ACRONYM LIST
+
+Because specialized readers of the Apollo 13 transcription, such as the principal investigators, may not be thoroughly familiar with the acronyms used during the mission, the decision was made to define those acronyms that probably will be encountered. For obvious reasons, no effort was made to include every acronym that conceivably could be used; only those acronyms that are considered likely to be used are included here.
+AEA        Abort electronics assembly
+AGS        Abort guidance system
+ALSCC      Apollo lunar surface closeup camera
+ALSD       Apollo lunar surface drill
+ALSEP      Apollo lunar surface experiments package
+AOS        Acquisition of signal
+AOT        Alinement optical telescope
+APS        Auxiliary propulsion system (S-IVB)/Ascent propulsion system (LM)
+ARS        Atmosphere revitalization system
+BEF        Blunt end forward
+CCGE       Cold cathode gage experiment
+CCIG       Cold cathode ion gage
+CDH        Constant delta altitude (height)
+CM         Command module
+CMC        Command module computer
+COAS       Crew optical alinement sight
+CP         Control point
+CPLEE      Charged particle lunar environment experiment
+CSC        Contingency sample collection
+CSI        Coelliptic sequence initiation
+CSM        Command and service module
+CWEA       Caution and warning electronics assembly
+DAC        Data acquisition camera
+DAP        Digital autopilot
+DEDA       Data entry and display assembly
+DET        Digital event timer
+DOI        Descent orbit insertion
+DPS        Descent propulsion system
+DSE        Data storage equipment
+DSEA       Data storage equipment assembly
+DSKY       Display and keyboard
+DTO        Detailed test objective
+ECS        Environmental control system
+EI         Entry interface
+EMS        Entry monitor system
+EMU        Extravehicular mobility unit
+EPS        Electrical power system
+ETB        Equipment transfer bag
+EVA        Extravehicular activity
+EVT        Extravehicular transfer
+FDAI       Flight director attitude indicator
+GDC        Gyro display coupler
+GET        Ground elapsed time
+GETI       Ground elapsed time of ignition
+HFE        Heat flow experiment
+HGA        High gain antenna
+HTC        Handtool carrier
+IMU        Inertial measurement unit
+IP         Initial point
+ISA        Interim stowage assembly
+IU         Instrument unit
+IVT        Intravehicular transfer
+LAD        Lunar atmosphere detector
+LCG        Liquid cooled garment
+LEB        Lower equipment bay
+LEC        Lunar equipment conveyor
+LGC        Lunar module guidance computer
+LM         Lunar module
+LOI        Lunar orbit insertion
+LOPC       Lunar orbit plane change
+LOS        Loss of signal/line of sight
+LPD        Landing point designator
+LTC        Lunar topographic camera
+MCC        Mission Control Center/midcourse correction
+MESA       Modular equipment stowage assembly
+MSFN       Manned Space Flight Network
+MTVC       Manual thrust vector control
+OPS        Oxygen purge system
+ORDEAL     Orbital rate display earth and lunar
+PDI        Powered descent initiation
+PGA        Pressure garment assembly
+PGNCS      Primary guidance, navigation, and control system (CM)
+PGNS       Primary guidance and navigation system (LM)
+PIPA       Pulsed integrating pendulous accelerometer
+PLSS       Portable life support system
+PRD        Personal radiation dosimeter
+PSE        Passive seismic experiment
+PTC        Passive thermal control
+RCS        Reaction control system
+RCU        Remote control unit
+REFSMMAT   Reference to stable member matrix
+RLS        Radius of landing site
+RTG        Radioisotope thermoelectric generator
+SCE        Signal conditioning equipment
+SCS        Stabilization control system
+SECS       Sequential events control system
+SEF        Sharp end forward
+SIDE       Suprathernial ion detector experiment
+SLA        SM/LM adapter
+SM         Service module
+SNAP       Systems for nuclear auxiliary power
+SPS        Service propulsion system
+SRC        Sample return container
+SWC        Solar wind composition
+SWE        Solar wind experiment
+TEC        Transearth coast
+TEI        Transearth injection
+Tig        Time of ignition
+TLC        Translunar coast
+TLI        Translunar injection
+TPF        Terminal phase final
+TPI        Terminal phase initiation
+TSB        Temporary stowage bag
+TVC        Thrust vector control
+UHT        Universal handtool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+000:00:02 CDR
+The clock is running.
+
+000:00:03 CMP
+Okay. P11, Jim.
+
+000:00:05 CDR
+Yaw program.
+
+000:00:12 CMP
+Clear the tower.
+
+000:00:14 CDR
+Yaw complete. Roll program.
+
+000:00:16 CC
+Houston, Roger. Roll.
+
+000:00:30 CC
+13, Houston. GO at 30 seconds.
+
+000:00:34 CDR
+Roll complete, and we are pitching.
+
+000:00:36 CC
+Roger that. Stand by for mode I Bravo.
+
+000:00:42 CC
+MARK.
+
+000:00:43 CC
+I Bravo.
+
+000:00:44 CMP
+I Bravo.
+
+000:00:45 CDR
+RCS COMMAND.
+
+000:01:03 CC
+13, Houston. GO at 1. We show the cabin relieving.
+
+000:01:07 CDR
+13; Roger.
+
+000:01:55 CC
+13, Houston. Stand by for mode I Charlie.
+
+000:01:58 CC
+MARK.
+
+000:01:59 CC
+You're I Charlie.
+
+000:02:00 CDR
+MARK.
+
+000:02:01 CDR
+I Charlie.
+
+000:02:02 CC
+And, 13, you are GO for staging.
+
+000:02:04 CDR
+GO for staging. Roger. We're EDS MANUAL.
+
+000:02:08 CC
+Copy that.
+
+000:02:16 CDR
+Inboard.
+
+000:02:27 CC
+We confirm inboard out, 13. You're looking good.
+
+000:02:29 CDR
+Roger.
+
+000:02:48 CDR
+S-II ignition.
+
+000:02:51 CC
+Roger.
+
+000:03:00 CC
+13, Houston. Trajectory is good; thrust is good.
+
+000:03:04 CDR
+Roger.
+
+000:03:15 CDR
+Skirt SEP ... tower JETT.
+
+000:03:21 CC
+We confirm skirt SEP. Roger. Tower JETT; mode II, Jim. Looking good.
+
+000:03:24 CDR
+Mode II.
+
+000:03:33 CDR
+Guidance initiate.
+
+000:03:43 CC
+13, Houston. Guidance is good, and the CMC is GO.
+
+000:03:47 CMP
+Okay. Thank you.
+
+000:03:48 CDR
+13; Roger.
+
+000:04:16 CC
+13, Houston. You are GO at 1+ minutes. The little red lines are right on the little white lines down here.
+
+000:04:22 CDR
+Sounds good.
+
+000:04:55 CC
+13, Houston. Coming up 5 minutes. You're looking perfect. Over.
+
+000:04:59 CDR
+13; Roger.
+
+000:05:32 CDR
+Inboard.
+
+000:05:36 CC
+Roger. We confirm inboard out. capability.
+
+000:05:44 CC
+13, Houston. Stand by for S-IVB to COI capability.
+
+000:05:48 CDR
+S-IVB to COI. Roger.
+
+000:05:49 CC
+Roger. You've got it now, Jim.
+
+000:05:52 CDR
+We've got S-IVB to COI.
+
+000:06:03 CC
+You're GO at 6 minutes, 13.
+
+000:06:06 CMP
+GO at 6.
+
+000:06:10 CDR
+And, Houston, what's the story on engine 5?
+
+000:06:14 CC
+Jim, Houston. We don't have the story on why the inboard out was early , but the other engines are GO and you are GO. 00 00 06 21 CDR Roger.
+
+000:06:41 CC
+13, Houston. Still looking good. Your gimbals are good; trim is good. 00 00 06 45 CDR Roger.
+
+000:06:53 CC
+13, Houston. Level sense arm time 8 plus 38 nominal; S-II cut-off time 9 plus 48. Over. 00 00 07 02 CDR Roger. Nominal on the level sense arm, 9:48 on the S-II cut-off.
+
+000:07:08 CC
+That's affirmative, and stand by for S-IVB to orbit .
+
+000:07:11 CC
+MARK.
+
+000:07:12 CC
+You have S-IVB to orbit, Jim.
+
+000:07:14 CDR
+Roger. We have S-IVB to orbit.
+
+000:08:02 CC
+13, Houston. Looking good at 8 minutes. 00 00 08 05 CC 13; Roger.
+
+000:08:45 CC
+Apollo 13, Houston. Mark level sense arm.
+
+000:08:48 CDR
+Mark level sense arm. Roger.
+
+000:08:58 CC
+Apollo 13, Houston. At 9 minutes, you are GO; the CMC is GO.
+
+000:09:02 CMP
+Okay, Joe.
+
+000:09:04 CDR
+13; Roger.
+
+000:09:19 CC
+13, Houston. You are GO for staging.
+
+000:09:22 CDR
+13; Roger. GO for staging.
+
+000:09:45 CC
+Apollo 13, Houston. Stand by for mode IV capability.
+
+000:09:48 CC
+MARK
+
+000:09:49 CC
+You have mode IV, Jim.
+
+000:09:50 CDR
+Mode IV. Roger. Staging.
+
+000:09:57 CC
+Roger. Staging.
+
+000:10:00 CDR
+And S-IV ignition, Houston.
+
+000:10:04 CC
+Roger that, Jim. Thrust looks good.
+
+000:10:07 CDR
+Roger.
+
+000:10:17 CC
+13, Houston. You're looking good. Trajectory, guidance , CMC are all GO .
+
+000:10:23 CDR
+Thank you, Joe.
+
+000:11:09 CC
+13, Housto. At 11 minutes, you're GO. Predieted cut-off on the S-IVB is 12 plus 34. Over.
+
+000:11:35 CC
+Apollo 13, Houston. You're GO at 11-1/2, and predicted cut-off time is 12 plus 34. Over.
+
+000:11:42 CDR
+understand; 12 plus 34 predicted cut-off time.
+
+000:11:45 CC
+That's affirm.
+
+000:12:31 CDR
+SECO.
+
+000:12:32 CC
+Copy SECO, Jim. We're looking at the DSKY.
+
+000:12:36 CDR
+Roger.
+
+000:13:02 CC
+Apollo 13, Houston. You have a GO orbit all sources, and the booster is safe. Over.
+
+000:13:07 CDR
+GO orbit and the booster is safe. Thank you, Joe.
+
+000:13:10 CC
+Don't mention it.
+
+000:13:30 CC
+13, Houston. We copy your NOUN 44.
+
+000:13:34 CMP
+Okay, Joe.
+
+000:14:57 CC
+Apollo 13, Houston. Your preliminary orbit down here is 102.5 times 100.3, and everything is looking good.
+
+000:15:06 CDR
+Roger, Houston. And it looks good to be up here again.
+
+000:15:10 CC
+I'll bet.
+
+000:15:34 CC
+13, Houston. I have your Z torquing angles. You ready?
+
+000:15:42 CDR
+Jack is ready to copy, Joe.
+
+000:15:44 CC
+Okay. It's plus 0.26. Over.
+
+000:15:52 CMP
+Okay, Joe. Plus 0.26.
+
+000:15:55 CC
+That's Roger.
+
+000:21:39 CC
+Apollo 13, Houston.
+
+000:21:42 CDR
+Go ahead, Houston.
+
+000:21:44 CC
+Okay. Couple minutes to LOS, Jim. Everything is looking real good. Your AOS time at Carnarvon will be 52:36, and we don't have too much of a handle on why the inboard cut off early except that it apparently was an engine problem and not a switch-select function. But we are certain that you'll be able to make TLI based on what we are looking at now.
+
+000:22:11 CDR
+Roger. There's nothing like an interesting launch.
+
+000:22:14 CC
+That' s right.
+
+000:23:14 CC
+Apollo 13, Houston. Canary LOS in 30 seconds. Request COMMAND RESET, please.
+
+000:23:21 CDR
+Roger. COMMAND RESET coming on.
+
+000:23:24 CC
+Thank you.
+
+000:23:40 CC
+Apollo 13, Houston. Request LOW BIT RATE, please. Over.
+
+000:23:44 CDR
+LOW BIT RATE.
+
+000:52:16 CMP
+Houston, how do you read 13?
+
+000:52:20 CC
+13, Houston. Loud and clear.
+
+000:52:23 CMP
+Okay, Joe. Everything's going good. We're proceeding on the time line in good fashion. I've got a P52 done. I can give you the torquing angles.
+
+000:52:33 CC
+I'm ready for them, Jack.
+
+000:52:35 CMP
+Okay. Use NOUN 26; stars 26 and 33. The star angle difference was all balls. NOUN 93: minus 067, minus all balls, plus 0.162. The time of torquing was 45 minutes 35 seconds.
+
+000:52:59 CC
+Well, that sounds marginally acceptable.
+
+000:53:04 CMP
+For a new CMP, it ain't too bad.
+
+000:53:05 CC
+Yes. Okay, 13. We've got nothing for you at the moment. Everything's looking good. We're looking at your data now.
+
+000:58:10 CC
+Apollo 13, Houston. LOS Carnarvon in about 30 seconds. Honeysuckle on the hour, and verify your S-band is up for Honeysuckle. Over.
+
+000:58:21 LMP
+That's verified.
+
+000:58:23 CC
+Roger.
+
+000:58:24 CDR
+And, Houston, we're beginning to see a beautiful sunrise here.
+
+000:58:29 CC
+Roger that , Jim.
+
+001:00:51 CC
+13, Houston through Honeysuckle.
+
+001:01:10 CC
+Apollo 13, Houston through Honeysuckle.
+
+001:01:15 CDR
+Roger, Houston; 13 here. Reading you loud and clear.
+
+001:01:19 CC
+Okay. S-band sounds good, Jim.
+
+001:03:21 LMP
+Houston, 13.
+
+001:03:24 CC
+Go ahead, 13.
+
+001:03:26 LMP
+Would it be okay if 1 crank up the FM . . . . . . ?
+
+001:03:37 CC
+You're coming in weak. I didn't quite copy it.
+
+001:03:42 LMP
+Would it be okay, Joe, if we crank up the FM after we leave Honeysuckle here?
+
+001:03:47 CC
+Oh. Stand by on that one.
+
+001:04:43 CC
+13, Houston.
+
+001:04:46 CDR
+Go ahead, Houston.
+
+001:04:48 CC
+What TV was that? Okay, 13 - - 00 0l 04 55 LMP Okay, Joe. I just wanted to put on the TV switch at Honeysuckle to tune her up there.
+
+001:05:01 CC
+Roger. I'm being prompted, and you've got a GO for that. You can turn it on, go to TV, and we'll see you that way over the States.
+
+001:05:10 LMP
+Okay.
+
+001:05:36 CC
+Okay. 13, Houston. LOS Honeysuckle in about 30 seconds, and we'll see you over the States a l plus 28 plus 43.
+
+001:05:57 CC
+13, Houston. Did you copy your AOS time?
+
+001:28:40 CC
+Apollo 13, Houston through Guaymas. Over.
+
+001:29:31 CC
+Apollo 13, Houston through Guaymas. Over.
+
+001:29:55 CC
+Apollo 13, Houston.
+
+001:30:28 CC
+Apollo 13, Houston. Over.
+
+001:30:48 CC
+Apollo 13, Houston. Over.
+
+001:31:07 CC
+Apollo 13, Houston. Over.
+
+001:31:09 CMP
+Go ahead.
+
+001:31:10 CC
+Hello there. We thought you were still up there.
+
+001:31:13 CMP
+And we're just coming up on Baja, and I've got the TV on. Do you want it?
+
+001:31:18 CC
+I don't think we require it just yet, Jack, but we'll command it when we're ready. I believe they are dumping the tape now. The booster looks good. The spacecraft looks good on the few minutes' data we've had.
+
+001:31:31 CDR
+That sounds good.
+
+001:31:35 CMP
+Jim finally let me look out.
+
+001:31:41 CC
+(Laughter) How do you like it?
+
+001:31:52 CMP
+Chained me to the LEB down there stowing things and unstowing things , and I finally got a chance to look out and see the world.
+
+001:32:16 CC
+Apollo 13, Houston. I have the TLI plus 90, and liftoff plus 8 pads whenever you're ready.
+
+001:32:35 CDR
+Okay. Go ahead with the TLl pad, Joe.
+
+001:32:41 CC
+Okay. This is the TLI plus 90 pad. SPS/G&N, 63825, minus 1.54, plus 1.32, 004:06:45.53, minus 0491.7, plus 0000.1, plus 6634.0, 180, 228, 001; HA is N/A; HP is plus 0017.9; 6652.2, 7:37, 6626.5, 26, 155.4, 15.7. Boresight star is Zeta Sagittarii; up, 08.0; right, 2.1; minus 22.81, minus 025.00, 1140.7, 34087, 013:32:14. Set stars Arcturus , Denebola; roll 044; pitch 012, yaw 025; no ullage. Over.
+
+001:34:41 CDR
+Joe, we had a dropout of signal there about midway or about a fifth of the start of your pad, and Fred didn't get it. We'd like you to start over again Could you please?
+
+001:34:52 CC
+Sure thing. You want the whole thing?
+
+001:34:54 CDR
+Yes, I think you'd better.
+
+001:34:56 CC
+Okay. TLI plus 90: SPS/G&N, 63825, minus 1.54. plus 1.32, 004:06:45.53, minus 0491.7, plus 0000.1, plus 6634.0, 1.80, 228, 001; N/A; plus 0017.9, 6652.2, 7:37, 6626.5, 26, 155.4, 15.7; Zeta Sagittarius; up, 08.0; right 2.1; minus 22.81, minus 025.00, 1140.7, 34087, 013:32:14. Set starts: Arcturus, Denebola; roll 044, pitch 012, yaw 025; no ullage. Over.
+
+001:36:47 LMP
+Okay, Joe. That's 63825, minus 1.54, plus 1.32, 004:06:45.53 - -
+
+001:37:02 CC
+Fred, Houston. Stand by 1.
+
+001:37:04 LMP
+- - minus 0491.7, plus 0000.1, plus 6634.0.
+
+001:37:12 CC
+Fred, Houston. Over.
+
+001:37:13 LMP
+Go ahead.
+
+001:37:15 CC
+That's correct. We would like you to go the S-BAND AUX TV switch to TV, please.
+
+001:37:22 LMP
+Okay. It's set to TV.
+
+001:37:23 CC
+Okay. We're not getting a signal.
+
+001:37:25 CDR
+Okay. I'll go to TRANSMIT, Joe.
+
+001:37:26 CC
+Okay. You can continue reading back.
+
+001:37:31 LMP
+Okay. Roll 180, pitch 228, yaw 001; N/A; plus 0017.9, 6652.2, 7:37, 6626.5 and 1 missed sextant shaft - trunnion - trunnion, 15.7, Zeta Sagittarius, up, 08.0; roll 2.1; minus 22.81, minus 00 - correctien, minus 025.00, 1140.7, 34087, 013:32:14. Set stars: Arcturus and Denebola; roll aline 044, pitch 012, yaw 025; no ullage.
+
+001:38:31 CC
+Roger, Fred. Readback correct. The sextant star is 26, and the shaft is 15.54. Over.
+
+001:38:42 LMP
+Okay. Sextant star 26 and 15.54.
+
+001:38:46 CC
+Roger. And we have a picture now; however, it's moving around quite a bit , if you could hold the camera a little steadier. And I have your - - 00 01 38 54 LMP - - Okay, Joe. There's nothing but clouds outside, and when we get some land down there coming up, I'll switch back to the window. I thought I'd just show you Jim here, to make sure he ' s still here .
+
+001:39:08 CC
+Okay; real fine. We had a good picture of Jim there for a minute. I have the liftoff plus 8 pad, Fred. If you're ready.
+
+001:39:17 LMP
+Go ahead, Joe.
+
+001:39:18 CC
+Okay. GET I , OO8:00; DELTA-VT 7835; longitude, minus 165; GET 400 K, 022:36. Over.
+
+001:39:41 LMP
+Okay. 008:00, 7835, minus 165, 022:36.
+
+001:39:49 CC
+Okay, then. And I have a TLI pad for you.
+
+001:39:54 LMP
+Okay. I'm ready.
+
+001:39:55 CC
+TLI: 2:26:05, 179, 108, 000, 5:47, 10416.9, 35587, 358, 139, 320, 302, 319, 040. Ejection time, 4 plus 01 plus 00. Over.
+
+001:40:44 LMP
+Okay. TLI: 2 plus 26 plus 05, 179, 108, 000, 5 plus 47, lO4l6.9, 35587, 358, l39, 320, 302, 3l9, 040, and ejection time, 4 plus 01 plus 00.
+
+001:41:18 CC
+Roger, Fred. Readback correct, and we're getting a nice coder TV picture now. lf you have any commentary to go with it..
+
+001:41:31 CMP
+Okay, Joe. I'll tell you I'm just trying to figure out where we are here.
+
+001:41:40 CC
+That's your job, not mine.
+
+001:41:43 CMP
+You know, I've just been up out of the LEB for a short time here, and I'm trying to find out which country we're over.
+
+001:41:52 CDR
+I have to keep telling Jack that blue stuff down there is water.
+
+001:41:56 CC
+I'll give you a hint. You're in the western hemisphere .
+
+001:42:10 CMP
+Okay, Joe. It appears like that we've crossed out into the Gulf of Mexico here, and I've got a peninsuia or an island that's down there. I don't know whether you can see it.
+
+001:42:34 CC
+Roger, Jack. We see that. Of course, there's a lot of cloudcover and you see it more clearly than we do, but it does look like the Earth, not the Moon.
+
+001:42:58 CC
+Apollo 13, Houston. We've had LOS MILA now. Thank you very much.
+
+001:43:48 CC
+Apollo 13, Houston. Request P00 and ACCEPT for a state vector. Over.
+
+001:43:53 CDR
+Roger, Houston. We're in P00 and ACCEPT.
+
+001:43:56 CC
+Okay.
+
+001:48:08 CC
+Apollo 13, Houston.
+
+001:48:10 CDR
+Go ahead, Houston.
+
+001:48:11 CC
+Okay. The computer is yours, Jim.
+
+001:48:14 CDR
+Thank you, - -
+
+001:48:16 CC
+And you are GO for TLI. Huntsville reperts that you have a 6-second propellant pad which is 3 seconds more than a 3-sigma case; so you're good on consumabies . The IU is so good that we're not going to update it. The only change we have for you is in the TLI checkiist. At 57 minutes where you slew the FDAI to 18 degrees, we recommend 20 degrees there, and we recommend that you look for 8 degrees instead of 6 degrees at ignition. The S_IVB is riding on the top of its deadband.
+
+001:48:56 CDR
+- - understand; and just out of curiosity was that engine out to use up more S-IVB fuel?
+
+001:49:03 CC
+The engine out did cause you to use more S-IVB fuel - about a 10-second-longer burn; but you're still GO.
+
+001:49:12 CDR
+Okay. Thank you.
+
+001:49:21 CC
+And, 13, Houston. We're ready to support pyro arm and docking probe extension whenever you're ready.
+
+001:49:36 CDR
+Okay, Houston. Docking probe has been extended and all indications are nominal. We're down to PYR0 ARM now and we're getting ready.
+
+001:49:47 CC
+Okay, Jim.
+
+001:49:58 CDR
+Okay, Houston.. My circuit breaker's armed - or closed; SEQUENTIAL LOGIC, two, on and up and we're ...
+
+001:50:06 CC
+Okay, 13. You are GO for pyro arm.
+
+001:50:40 CDR
+And, Houston, 13. Were you reading us?
+
+001:50:43 CC
+Roger, 13. Go ahead.
+
+001:50:47 CDR
+Roger. We have our SEQUENTIAL ARM circuit breakers in and our SEQUENTIAL LOGIC, two, on and up and we are just standing by for your confirmation for a GO.
+
+001:50:56 CC
+Sorry, 13. You didn't copy. You are GO for pyro arm. Over.
+
+001:51:00 CDR
+Okay; fine. Thank you.
+
+001:53:21 CC
+Apollo 13, Houston.
+
+001:53:24 CDR
+Go ahead, Houston.
+
+001:53:26 CC
+About 2-1/2 minutes to L0S, Jim, and your AOS at Carnarvon will be 2 plus 25 plus 50. 0ver.
+
+001:53:41 CDR
+Roger. AOS at Carnarvon 2 plus 25 plus 50.
+
+001:53:45 CC
+That's affirm.
+
+001:53:57 CC
+Apollo 13, Houston. LOS in about 1 minute. At LOS we would like COMMAND RESET and then NORMAL.
+
+001:55:06 CDR
+Roger.
+
+002:25:38 CC
+Apollo 13, Houston through Carnarvon.
+
+002:25:41 CMP
+Okay, Joe. Read you loud and clear. We are sitting here monitoring time base 6. ... countdown; we're 20 seconds away.
+
+002:25:49 CC
+Okay. We're just starting to get data, and everything still looks good to us .
+
+002:25:53 CMP
+Hey, Joe. At 2 hours and 12 minutes, the 02 FLOW HIGH light came on, and it's been pegged high ever since, so it's been on about 14 minutes now.
+
+002:26:04 CC
+Roger, 13. We're looking at it.
+
+002:26:09 CDR
+Time base 6.
+
+002:26:12 CC
+Copy. Time base 6.
+
+002:26:52 CC
+Okay. Apollo 13, Houston. You have a GO for all systems, and the O2 FLOW HlGH check is nominal with the WASTE TANK VENT open at this time, and it's no sweat.
+
+002:27:05 CMP
+Okay. Just wanted you all to check it for me.
+
+002:27:08 CC
+Okay. We did.
+
+002:27:11 CMP
+Thank you.
+
+002:31:22 CC
+Apollo 13, Houston. We will be losing data from Carnarvon in about 1 minute. We 'll probably have voice through ARIA. Everything is honkey-dory , and we will be listening for you to tell us how the burn goes.
+
+002:31:34 CDR
+Okay, this is 13. We are standing by, too.
+
+002:33:14 CC
+Apollo 13, Houston through ARIA. Just a COMM check. Over.
+
+002:33:20 CDR
+Reading you clear ...
+
+002:33:26 CC
+Okay, Jim. It's not the besst, but we are reading you.
+
+002:33:30 CDR
+Roger.
+
+002:35:51 CDR
+Ignition, Houston.
+
+002:35:53 CC
+Copy that, Jim. Good deal.
+
+002:37:52 CDR
+Everything's okay so far.
+
+002:37:56 CC
+Houston; Roger.
+
+002:38:27 CDR
+... at 38.
+
+002:40:26 CDR
+We're getting a little vibration during this burn.
+
+002:40:28 CC
+Houston; Roger.
+
+002:41:40 CDR
+It's off. Engine off.
+
+002:41:42 CC
+Houston. Copy. Engine off.
+
+002:42:27 CC
+13 , Houston. We'll have you through Hawaii in 3 minutes.
+
+002:42:31 CDR
+Roger. Through Hawaii in 3 minute.
+
+002:45:30 CC
+Apollo l3, Houston through Hawaii. Over.
+
+002:45:34 CDR
+l3 through Hawaii. How do you read?
+
+002:45:38 CC
+13, Houston. You're weak but clear; it will probably get better in a second. We're standing by for the burn report.
+
+002:45:44 CDR
+Roger.
+
