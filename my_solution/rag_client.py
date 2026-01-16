@@ -185,14 +185,17 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         # DONE: Clean up category name formatting (replace underscores, capitalize)
         category = category.replace("_", " ").capitalize()
 
+        # extract section
+        section = metadata.get('section') or 'Section Unknown'
+
         
         # DONE: Create formatted source header with index number and extracted information
-        source_header = f"\n# {i}. {source}"
+        source_header = f"# {i}. {source} - {mission} - {category} - {section}"
         # DONE: Add source header to context parts list
         context.append(source_header)
         
         # DONE: Check document length and truncate if necessary
-        truncated_document = f"{document[:100]}.." if len(document) < 100 else document
+        truncated_document = f"{document[:100]}..." if len(document) < 100 else document
         # DONE: Add truncated or full document content to context parts list
         context.append(truncated_document)
 
