@@ -233,14 +233,7 @@ class ChromaEmbeddingPipelineTextOnly:
         chunks = []
         if len(tokens) < chunk_size:
             # DONE: Handle short texts that don't need chunking
-            chunks.append((
-                text,
-                # DONE: Create metadata for each chunk
-                metadata | {
-                    "token_count": len(tokens),
-                    "position": 0
-                } 
-            ))
+            chunks.append(tokens)
         else:
             # TODO: Try to break at sentence boundaries
             # split the document into lines and lines into sentences
@@ -289,6 +282,7 @@ class ChromaEmbeddingPipelineTextOnly:
                     chunks.append(trailing_chunk)
                 
                 index += 1
+            logger.info(f"{logger_prefix} Completed Chunking Total of ({len(sentences)}) sentences")
 
         enriched_chunks = []
         for i, chunk in enumerate(chunks):
@@ -299,8 +293,6 @@ class ChromaEmbeddingPipelineTextOnly:
                     "position": i
                 }
             ))
-
-        logger.info(f"{logger_prefix} Completed Chunking Total of ({index}) sentences")
 
         return enriched_chunks
 
@@ -352,9 +344,24 @@ class ChromaEmbeddingPipelineTextOnly:
         # get non-empty lines
         clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
 
+        # instructions = """
+        # You are a specialized data processor. The content is a text document and your job is to detect lines that start with abbreviations and detect the expanded meaning of the abbreviation.
+        # Look for abbreviations indicating speakers, places, sites and acronyms all of which may be in separate tables throughout the document.
+        # The abbreviation will appear in a table of sequential lines of the text where the abbreviation is the first part of the line, and the remainder of the line is the definition.
+        # Extract these abbreviations and associated definitions to produce a single well formed JSON object with the abbreviations as the object keys and the acronym definitions as the associated values. 
+        # 
+        # """
+        instructions = """
+You are a specialized data processor. You evaluate document content for the purpose of extracting definitions of acryonyms and abbreviation from NASA documents.
+Identify abbreviations by looking for words apearing in all capitalized letters at the start of a line, followed by a series of spaces leading to the assocaited definition.
+Pay close attention to lines that include a human name and ensure the human name is included as part of the definition.
+Produce a JSON object with the abbreviation as the field name of the object and the definition text as the string value for that field.
+The result must be well formed JSON with no other text formatting or markup.
+"""
+
         system_prompt = {
             "role": "system", 
-            "content": f"You are a specialized data processor. The content will include table of acronyms from a document. Extract these acronyms and produce a well formed JSON object with the abbreviations as the object keys and the acronym definitions as the associated values."
+            "content": instructions
         }
 
         user_prompt = {
@@ -362,6 +369,7 @@ class ChromaEmbeddingPipelineTextOnly:
              "content": "\n".join(clean_lines)
         }
 
+        logging.info(f"USER_PROMPT: {user_prompt}")
         try:
             response = self.openai_client.chat.completions.create(
                 model=model,
@@ -375,7 +383,10 @@ class ChromaEmbeddingPipelineTextOnly:
 
             json_data = json.loads(content)
 
-            return json_data
+            # remove unwanted characters like periods from the values
+            cleaned_data = {k: v.replace('.', '') for k, v in json_data.items()}
+
+            return cleaned_data
         except Exception as e:
             traceback.print_exc()
             logger.error(f'Failed to summarize text: {e}')
@@ -469,7 +480,7 @@ class ChromaEmbeddingPipelineTextOnly:
 
         # build a dictionary representation of the acronyms we can use to enrich the logs during processing
         logger.info(f"{logger_prefix} Build Acronym lookup table")
-        acronym_lookups = self.get_acronym_lookup(acronym_text)
+        acronym_lookups = self.get_acronym_lookup(f"{intro_text}\n{acronym_text}")
         log_metadata = metadata | { "section": "transcript" }
 
         logger.info(f"{logger_prefix} Process Transcript Logs")
