@@ -25,7 +25,7 @@ def generate_response(openai_key: str, user_message: str, context: str,
     # DONE: Add chat history
     augmented_history = conversation_history + [prompt]
 
-    # DONE: Creaet OpenAI Client
+    # DONE: Create OpenAI Client
     if openai_key.startswith("voc-"):
         openai_client = OpenAI(
             api_key=openai_key,
