@@ -223,78 +223,59 @@ class ChromaEmbeddingPipelineTextOnly:
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-        logger_prefix = self.get_metadata_log_prefix(metadata)
         chunk_size = self.parameters['chunk_size']
-        overlap_size = self.parameters['chunk_overlap']
-
-       # encoding text will help us count tokens as we chunk
-        tokens = self.local_encoding.encode(text)
+        chunk_overlap = self.parameters['chunk_overlap']
 
         chunks = []
-        if len(tokens) < chunk_size:
+        if len(text) < chunk_size:
             # DONE: Handle short texts that don't need chunking
-            chunks.append(tokens)
+            chunks.append(text)
         else:
-            # TODO: Try to break at sentence boundaries
+            # DONE: Try to break at sentence boundaries
             # split the document into lines and lines into sentences
             sentence_pattern = r'(?<=[.!?])\s+'
             sentences = [
-                (s, self.local_encoding.encode(s)) 
+                f"{s} "
                 for line in text.splitlines() if line.strip() 
                 for s in re.split(sentence_pattern, line) if s.strip()
             ]
 
-            index = 0
-            while index < len(sentences):
-                # DONE: Implement chunking logic with overlap
-                if (index < 5 or index % 100 == 0 or index == len(sentences) - 1):
-                    logger.debug(f"{logger_prefix} Chunk sentence {index} of {len(sentences)}")
-
-                # get an overlap_size amount of previous tokens
-                previous_chunk = chunks[-1] if len(chunks) > 0 else []
-                processed_tokens = previous_chunk[-overlap_size:] if len(previous_chunk) > overlap_size else previous_chunk
+            # DONE: Implement chunking logic with overlap
+            current_chunk = ""
+            for sentence in sentences:
+                # Ensure there's a space if current_chunk isn't empty
+                test_sentence = f" {sentence}" if current_chunk else sentence
                 
-                # encode the current sentence into tokens
-                current_sentence, current_tokens = sentences[index]
-                remaining_tokens = self.local_encoding.encode(current_sentence)
-
-                if (index < 5 or index % 100 == 0 or index == len(sentences) - 1):
-                    logger.debug(f"{logger_prefix} Current Sentence: {current_sentence}")
+                # Scenario A: Sentence fits in the current chunk
+                if len(current_chunk) + len(test_sentence) <= chunk_size:
+                    current_chunk += test_sentence
                 
-                # start building a new chunk, padded with the overlap from previous tokens
-                building_chunks = []
-                building_chunks.extend(processed_tokens)
-                while len(remaining_tokens) >= chunk_size - overlap_size:
-                    extend_by_count = chunk_size - len(building_chunks)
-                    extend_by_contents = remaining_tokens[:extend_by_count] if len(remaining_tokens) > extend_by_count else remaining_tokens
-                    building_chunks.extend(extend_by_contents)
-                    remaining_tokens = remaining_tokens[extend_by_count:]
+                # Scenario B: Sentence exceeds chunk_size, time to flush
+                else:
+                    if current_chunk:
+                        chunks.append(current_chunk)
+                    
+                    # Start the new chunk with the overlap from the end of the previous chunk
+                    # We take the last 'chunk_overlap' characters
+                    overlap_text = current_chunk[-chunk_overlap:] if chunk_overlap > 0 else ""
+                    current_chunk = overlap_text + test_sentence
+            
+            # Don't forget the last remaining piece
+            if current_chunk:
+                chunks.append(current_chunk)
 
-                    # when we fill the bin with tokens store the chunks and set up for the next iteration
-                    if len(building_chunks) >= chunk_size:
-                        chunks.append(building_chunks)
-                        building_chunks = building_chunks[:overlap_size] if len(building_chunks) >= overlap_size else building_chunks
 
-                # handle the last chunk of the sentence
-                if len(remaining_tokens) > 0:
-                    trailing_chunk = building_chunks[-overlap_size:] if len(building_chunks) >= overlap_size else building_chunks
-                    trailing_chunk.extend(remaining_tokens)
-                    chunks.append(trailing_chunk)
-                
-                index += 1
-            logger.debug(f"{logger_prefix} Completed Chunking Total of ({len(sentences)}) sentences")
-
-        enriched_chunks = []
+        meta_chunks = []
         for i, chunk in enumerate(chunks):
-            enriched_chunks.append((
-                self.local_encoding.decode(chunk),
+            meta_chunks.append((
+                chunk,
                 metadata | {
                     "token_count": len(chunk),
                     "position": position_start + i
                 }
             ))
 
-        return enriched_chunks
+        return meta_chunks
 
 
     def summarize_text(self, text: str, size: int, model: str = "gpt-3.5-turbo") -> List[Dict[str, Any]]:
@@ -445,25 +426,6 @@ The result must be well formed JSON with no other text formatting or markup.
         chunks.append(chunk)
         position_tracker = len(chunks)
 
-        # create one summary for each paragraph as detected by consecutive newlines
-        # NOTE: this summary approach was a clever idea, pat myself on back, but...
-        #       i think this could end up sending way more info to the LLM 
-        #       when the paragraph is large and leaves me with few controls 
-        #       to manage it as a generic lookup.
-        #       the summary is great for the embedding, but the llm will wants more detail
-        #       and i need to select the right excerpt to send, not just the summary.
-        # paragraphs = [b.strip() for b in re.split(r'\n\s*\n', intro_text) if b.strip()]
-        # summaries = [self.summarize_text(paragraph) for paragraph in paragraphs]
-        # for paragraph, summary in zip(paragraphs, summaries):
-        #     chunks.append((
-        #         paragraph,
-        #         metadata | {
-        #             "section": "intro",
-        #             "token_count": len(self.local_encoding.encode(paragraph)),
-        #             "enriched_text": summary
-        #         }
-        #     ))
-
         # do a generic chunking on the introduction text
         logger.info(f"{logger_prefix} Extract Introduction")
         intro_metadata = metadata | { "section": "introduction" }
@@ -483,49 +445,19 @@ The result must be well formed JSON with no other text formatting or markup.
         acronym_lookups = self.get_acronym_lookup(f"{intro_text}\n{acronym_text}")
         log_metadata = metadata | { "section": "transcript" }
 
-        logger.info(f"{logger_prefix} Process Transcript Logs")
+        # the transcript processor will help us produce enriched sentence strings with abbreviations filled in to increase search relevance
         transcript_processor = TranscriptProcessor(acronym_lookups)
 
-        bundle_threshhold = 15
-        bundle_padding = 5
+        sentences = []
         count = 0
-        record_buffer = []
-        # maintain a sliding window of {bundle_threshold} records.
-        # process all {bundle_thresholds} when we hit the threshhold.
-        # move the window forward by {bundle_padding} overlapping records
-        # loop until the threshhold is met again, and repeat until all records processed.
         for record in transcript_processor.process_transcript(log_text, log_metadata):
+            sentences.append(record.get("enriched_text"))
             count += 1
-            record_buffer.append(record)
-
-            if (count % 500 == 0):
-                logger.info(f"{logger_prefix} Extracting transcript record ({count}) enriched text: {record.get("enriched_text")}")
-
-            if len(record_buffer) < bundle_threshhold:
-                continue
-            else:
-                combined_text = "\n".join([record.get("enriched_text") for record in record_buffer])
-                bundle_chunks = self.generic_chunk_text(
-                    combined_text,
-                    metadata | { "section": "transcript" },
-                    position_start=position_tracker
-                )
-                chunks.extend(bundle_chunks)
-                position_tracker = len(chunks)
-                record_buffer = record_buffer[bundle_padding:]
-
-        # clear whatever is left over in the buffer
-        combined_text = "\n".join([record.get("enriched_text") for record in record_buffer])
-        bundle_chunks = self.generic_chunk_text(
-            combined_text,
-            metadata | { "section": "transcript" },
-            position_start=position_tracker
-        )
-        chunks.extend(bundle_chunks)
+        
+        enriched_log_text = "\n".join(sentences)
+        transcript_chunks = self.generic_chunk_text(enriched_log_text, log_metadata, position_start=position_tracker)
+        chunks.extend(transcript_chunks)
         position_tracker = len(chunks)
-
-        # TODO: my approach above tries to stay inside the chunk_size requirement
-        #       which sort of loses the ability to keep both the original_text and enriched_text at the same time.
 
         logger.info(f"{logger_prefix} Finished Processing Total of ({count}) Transcript Records")
 
