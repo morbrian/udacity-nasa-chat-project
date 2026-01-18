@@ -391,15 +391,11 @@ The result must be well formed JSON with no other text formatting or markup.
             
         Returns:
             List of dictionaries with entries:
-              text: original text block
-              augmented_text: text with additional information to use for embedding
-              augmented_token_count: number of tokens as counted by the self.local_encoding implementation
+              text: enriched text sized for use as embedding
               metadata:
                 "token_count": len(chunk_tokens),
                 "position": numeric index into section of document,
-                section: which section the content came from
-                speaker: speaker abbreviation, or empty if not from the log section
-                time: milliseconds time stamp, or empty if not from the log section
+                "section": name of document section where the content came from
         """
         logger_prefix = self.get_metadata_log_prefix(metadata)
         logger.info(f"{logger_prefix} Begin processing transcript")

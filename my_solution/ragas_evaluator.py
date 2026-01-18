@@ -16,7 +16,7 @@ try:
 except ImportError:
     RAGAS_AVAILABLE = False
 
-def evaluate_response_quality(question: str, answer: str, contexts: List[str], reference: str = None) -> Dict[str, float]:
+def evaluate_response_quality(question: str, answer: str, contexts: List[str], ground_truth: str = None) -> Dict[str, float]:
     """Evaluate response quality using RAGAS metrics"""
     if not RAGAS_AVAILABLE:
         return {"error": "RAGAS not available"}
@@ -65,7 +65,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], r
         user_input=question,
         response=answer,
         retrieved_contexts=contexts,
-        reference_contexts=reference
+        reference_contexts=ground_truth
     )
 
     results = {
@@ -73,7 +73,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], r
         "relevancy": asyncio.run(response_relevancy.single_turn_ascore(sample))
     }
     
-    if (reference is not None):
+    if (ground_truth is not None):
         results = results | { 
             "bleu": asyncio.run(bleu.single_turn_ascore(sample)),
             "rouge": asyncio.run(rouge.single_turn_ascore(sample)),
