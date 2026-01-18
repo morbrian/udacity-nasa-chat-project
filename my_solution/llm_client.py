@@ -2,28 +2,48 @@ from typing import Dict, List
 from openai import OpenAI
 import os
 import sys
+import argparse
+
+SYSTEM_PROMPT = """You are a strict grounded-truth assistant performing as a NASA mission expert. 
+
+### CONSTRAINTS ###
+1. ACCESS: Use ONLY the provided <context> tags.
+2. CONFLICT: If <context> contradicts your training data, prioritize <context>.
+3. GROUNDING: Every sentence MUST end with a citation (e.g., [1], [2]).
+4. Do NOT use outside knowledge.
+5. INCLUDE timestamp in References Titles, eg "000:02:43"
+
+### OUTPUT FORMAT ###
+You must follow this EXACT structure ALWAYS include References:
+<Your factual response here, with citations...> 
+
+References:
+- [1] <Title/ID of Context-1> <timestamp>
+- [2] <Title/ID of Context-2> <timestamp>
+"""
+
+# some notes on prompt choices
+# forcing the LLM to never use its training data for something as well known as the NASA data was a little tricky,
+# and even now there is no guarantee that it won't sometimes respond with information not provided in the context.
+# 
+# A) When I included the following instruction the LLM was often unable to answer questions even when the answer was clearly in the context:
+#    * If the answer is not found in the <context>, you must state: "I'm sorry, the provided context does not contain information regarding this request."
+# 
 
 def generate_response(openai_key: str, user_message: str, context: str, 
                      conversation_history: List[Dict], model: str = "gpt-3.5-turbo") -> str:
     """Generate response using OpenAI with context"""
     
     # DONE: Define system prompt
-    system_prompt = f"""Using only these documents answer the user question.
-
-    Context Documents:
-    {context}
-
-    User Question: {user_message}
-
-    Respond as if you are a NASA Expert with a comprehensive answer based only on the provided context.
-    List references for all information provided.
-    """
+    system_prompt = { "role": "system", "content": SYSTEM_PROMPT }
 
     # DONE: set context in messages
-    prompt = { "role": "system", "content": system_prompt }
+    user_content = f"""<context>{context}</context><question>{user_message}</question>"""
+
+    user_prompt = { "role": "user", "content": user_content }
 
     # DONE: Add chat history
-    augmented_history = conversation_history + [prompt]
+    augmented_history = conversation_history + [system_prompt] + [user_prompt]
 
     # DONE: Create OpenAI Client
     if openai_key.startswith("voc-"):
@@ -49,7 +69,7 @@ def generate_response(openai_key: str, user_message: str, context: str,
     response = openai_client.chat.completions.create(
         model=model,
         messages=augmented_history,
-        temperature=0.7, # 
+        temperature=0.3, # keeping this low helps focus on the training docs, but non-zero also provides enough freedom to help it perform more like a NASA expert. 
         max_tokens=300 # TODO: keep it short while testing
     )
 
@@ -58,9 +78,28 @@ def generate_response(openai_key: str, user_message: str, context: str,
     
 
 def main():
+    parser = argparse.ArgumentParser(description='Testing Data LLM Prompt Information Controls')
+    parser.add_argument('--question', 
+                        default='Who were the crew members of the Apollo 13?', 
+                        help='Path to data directories')
+    parser.add_argument('--context', 
+                        default='No Context', 
+                        help='Context information the LLM is allowed to use for answering questions.')
+
+
+    args = parser.parse_args()
+
     api_key = os.getenv("OPENAI_API_KEY")
-    response = generate_response(api_key, "What was Apollo 11?", "", [])
-    print(response)
+
+    response = generate_response(
+        api_key, 
+        args.question, 
+        args.context, 
+        []
+    )
+
+    print(f"\n\nQUESTION: {args.question}")
+    print(f"\n\nRESPONSE: {response}")
 
 
 if __name__ == "__main__":

@@ -190,14 +190,16 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
 
         
         # DONE: Create formatted source header with index number and extracted information
-        source_header = f"# {i}. {source} - {mission} - {category} - {section}"
+        source_header = f"\nReference Title: {i+1}: {source}:{mission}:{category}:{section}\n"
         # DONE: Add source header to context parts list
         context.append(source_header)
         
         # DONE: Check document length and truncate if necessary
         truncated_document = f"{document[:100]}..." if len(document) < 100 else document
         # DONE: Add truncated or full document content to context parts list
+        context.append("Reference Context:")
         context.append(truncated_document)
+        
 
     # DONE: Join all context parts with newlines and return formatted string
     formatted_context = "\n".join(context)
