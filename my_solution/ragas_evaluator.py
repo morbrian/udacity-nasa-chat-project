@@ -257,6 +257,7 @@ def main():
     
     results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
 
+    averages = {}
     for record in results_bundle:
         print(f"\n{LOG_PREFIX} 💼 === START Test Case ====")
         print(f"{LOG_PREFIX} ❔ Question: {record.get('question', '')}")
@@ -265,7 +266,12 @@ def main():
         display_evaluation_metrics(record.get('scores', []))
         print(f"\n{LOG_PREFIX} 💼 === END Test Case ====")
 
-    print(f"\n\n{LOG_PREFIX} Completed {len(results_bundle)} Test Cases")
+    print(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
+    averages = {
+        key: sum(item['scores'][key] for item in results_bundle) / len(results_bundle) 
+        for key in results_bundle[0]['scores']
+    }
+    display_evaluation_metrics(averages)
 
 if __name__ == "__main__":
     main()    
