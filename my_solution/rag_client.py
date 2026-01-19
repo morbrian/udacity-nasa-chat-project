@@ -195,7 +195,7 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         context.append(source_header)
         
         # DONE: Check document length and truncate if necessary
-        truncated_document = f"{document[:100]}..." if len(document) < 100 else document
+        truncated_document = f"{document[:500]}..." if len(document) < 500 else document
         # DONE: Add truncated or full document content to context parts list
         context.append("Reference Context:")
         context.append(truncated_document)
