@@ -132,6 +132,9 @@ class ChromaEmbeddingPipelineTextOnly:
             chunk_size: Maximum size of text chunks
             chunk_overlap: Overlap between chunks
         """
+        if not openai_api_key:
+            raise ValueError(f"ERROR: Must specify valid OpenAI key")
+        
         # DONE: Initialize OpenAI client
         if openai_api_key.startswith("voc-"):
             self.openai_client = OpenAI(
@@ -145,8 +148,7 @@ class ChromaEmbeddingPipelineTextOnly:
             )
             logger.info("Using OpenAI client key.")
         else:
-            logger.error(f"""ERROR: Unknown client key type: {openai_api_key} - Expected key types start with 'sk-' or 'voc-'""")
-            sys.exit()
+            raise ValueError(f"ERROR: Unknown client key type: {openai_api_key} --Expected key types start with 'sk-' or 'voc-'")
 
         # DONE: Store configuration parameters
         self.parameters = {
