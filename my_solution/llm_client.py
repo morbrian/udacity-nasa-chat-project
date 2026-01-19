@@ -4,7 +4,7 @@ import os
 import sys
 import argparse
 
-SYSTEM_PROMPT = """You are a strict grounded-truth assistant performing as a NASA mission expert. 
+SYSTEM_PROMPT = """You are a strict grounded-truth assistant performing as a NASA mission expert.
 
 ### CONSTRAINTS ###
 1. ACCESS: Use ONLY the provided <context> tags.
@@ -59,11 +59,9 @@ def generate_response(openai_key: str, user_message: str, context: str,
         )
         print("Using OpenAI client key.")
     else:
-        print(f"ERROR: Unknown client key type: {openai_key}")
-        print("Expected key types start with 'sk-' or 'voc-'")
-        sys.exit()
+        raise ValueError(f"ERROR: Unknown client key type: {openai_key} --Expected key types start with 'sk-' or 'voc-'")
     
-    print(f"SENDING: {augmented_history}")
+    print(f"==== Generate Response From Messages ===\n{augmented_history}\n==== End Messages ====")
 
     # DONE: Send request to OpenAI
     response = openai_client.chat.completions.create(
