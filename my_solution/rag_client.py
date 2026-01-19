@@ -7,7 +7,7 @@ import json
 import sys
 from openai import OpenAI
 
-def get_embedding(text: str, model: str):
+def get_embedding(text: str, model: str = "text-embedding-3-small"):
     """
     Get text embedding using model
 
@@ -18,7 +18,7 @@ def get_embedding(text: str, model: str):
     Returns:
         Embedding vector
     """
-    api_key = os.getenv("OPENAI_API_KEY") or os.getenv["CHROMA_OPENAI_API_KEY"]
+    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("CHROMA_OPENAI_API_KEY") or 'nil'
     openai_client = None
     if api_key.startswith("voc-"):
         openai_client = OpenAI(
@@ -30,8 +30,8 @@ def get_embedding(text: str, model: str):
             api_key=api_key
         )
     else:
-        print(f"""ERROR: Unknown client key type: {api_key} - Expected key types start with 'sk-' or 'voc-'""")
-        sys.exit()
+        error_message = f"""ERROR: Unknown client key type: {api_key[:3]} - Expected key types start with 'sk-' or 'voc-'"""
+        raise ValueError(error_message)
     
     try:
         # DONE: Call OpenAI embeddings API
@@ -208,8 +208,11 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
 
 
 def main():
-   backends = discover_chroma_backends()
-   print(json.dumps(backends, indent=4))
+    try:
+        backends = discover_chroma_backends()
+        print(json.dumps(backends, indent=4))
+    except Exception as e:
+       print(f"Failed to test backends: {e}") 
 
 
 if __name__ == "__main__":
