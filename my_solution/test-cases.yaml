@@ -39,3 +39,7 @@ test_cases:
   - question: "How did the teamwork and collaboration among the crew members contribute to the successful outcome of the mission despite the challenges faced?"
     ground_truth: |
       The survival was a result of disciplined teamwork where each member managed specific areas: Swigert handled Command Module shut-down/start-up, Haise managed the LM systems, and Lovell provided overall command and manual piloting. This division of labor, supported by the tireless work of Mission Control, allowed them to solve complex, overlapping failures that would have overwhelmed a less synchronized team.
+
+  # - question: "Who were the crew members of the Apollo 13?"
+  #   ground_truth: |
+  #     The crew members of the Apollo 13 mission were Jim Lovell, Jack Swigert, and Fred Haise 
