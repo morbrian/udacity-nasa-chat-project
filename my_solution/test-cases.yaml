@@ -1,0 +1,41 @@
+
+test_cases:
+  - question: "What was the role of the Lunar Module Pilot, Fred W. Haise, Jr., during the mission?"
+    ground_truth: |
+      As the Lunar Module Pilot (LMP), Fred Haise was responsible for the systems and operation of the Lunar Module (LM), Aquarius. While originally intended to pilot the LM to the lunar surface at Fra Mauro, his role shifted after the explosion to managing the LM's life support and propulsion systems, effectively turning the LM into a 'lifeboat' to sustain the three-man crew.
+
+  - question: "How did the Capsule Communicator (CAP COMM) contribute to communication between the spacecraft and Mission Control?"
+    ground_truth: |
+      The CAPCOM acted as the primary and often sole voice communicating with the astronauts to ensure clarity and minimize confusion. During Apollo 13, various CAPCOMs (including Jack Lousma and Ken Mattingly) relayed critical, newly-developed procedures from the back-room engineers to the crew, such as the CO2 scrubber 'mailbox' build and the Command Module power-up sequence.
+
+  - question: "What was the significance of the Primary Guidance and Navigation System (PGNS) checklist page 57 during the mission?"
+    ground_truth: |
+      Page 57 of the LM Malfunction Procedures checklist contained troubleshooting steps for warning lights and system failures. This specific page is historically significant as it was used by the crew during the crisis to manage the transition of power and control systems from the failing Command Module to the Lunar Module.
+
+  - question: "How did the astronauts handle technical challenges, such as using the Alinement Optical Telescope (AOT) lamps to shoot the Sun?"
+    ground_truth: |
+      Due to a debris cloud of frozen oxygen and insulation following the explosion, the astronauts could not see stars for traditional navigation. They improvised by using the AOT to 'shoot the Sun'—using the Sun's limb as a reference point to verify the spacecraft's alignment for critical engine burns, such as the PC+2 burn to return to a free-return trajectory.
+
+  - question: "What were some of the key decisions made by Commander James A. Lovell, Jr., during the mission?"
+    ground_truth: |
+      Commander Lovell made several pivotal decisions, including the immediate transition of the crew into the Lunar Module after the Command Module lost power. He also manually controlled the spacecraft's attitude during the critical mid-course correction burns, relying on visual cues like the Earth and Sun because the automated guidance systems were powered down to conserve energy.
+
+  - question: "How did the crew interact with Mission Control in resolving issues and ensuring the safety of the mission?"
+    ground_truth: |
+      The interaction was one of intensive collaboration and 'working the problem.' Mission Control provided the mathematical calculations and procedural innovations (like the lithium hydroxide canister adapter), while the crew executed these steps in a freezing, high-stress environment, providing constant feedback on system status and cabin conditions.
+
+  - question: "What were the main objectives of the Apollo 13 mission and how were they impacted by the unexpected events that occurred?"
+    ground_truth: |
+      The primary objective was to land in the Fra Mauro Highlands to conduct geological surveys and deploy scientific instruments. These objectives were completely aborted after the oxygen tank explosion; the mission's sole objective became the safe return of the crew to Earth, making it a 'successful failure.'
+
+  - question: "How did the crew's training and preparation prior to the mission influence their ability to respond to emergencies and adapt to changing circumstances?"
+    ground_truth: |
+      The crew’s extensive training in simulators for 'non-nominal' scenarios allowed them to remain calm and methodical. Their deep understanding of the spacecraft systems enabled them to execute unpracticed procedures—like powering up a cold Command Module—with high precision under extreme physical and mental fatigue.
+
+  - question: "What lessons were learned from the Apollo 13 mission that influenced future space missions and astronaut training?"
+    ground_truth: |
+      NASA implemented several hardware changes, including adding a third oxygen tank in a different location and an auxiliary battery. Procedurally, the mission emphasized the importance of ground-based simulators for real-time crisis management and reinforced the 'team-of-teams' approach to problem-solving that became a hallmark of future Shuttle and ISS operations.
+
+  - question: "How did the teamwork and collaboration among the crew members contribute to the successful outcome of the mission despite the challenges faced?"
+    ground_truth: |
+      The survival was a result of disciplined teamwork where each member managed specific areas: Swigert handled Command Module shut-down/start-up, Haise managed the LM systems, and Lovell provided overall command and manual piloting. This division of labor, supported by the tireless work of Mission Control, allowed them to solve complex, overlapping failures that would have overwhelmed a less synchronized team.
