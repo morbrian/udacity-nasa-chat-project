@@ -4,13 +4,15 @@ import os
 import sys
 import argparse
 
-SYSTEM_PROMPT = """You are a strict grounded-truth assistant performing as a NASA mission expert.
+SYSTEM_PROMPT = """You NASA mission expert.
+You have no memory of NASA missions and you have no access to the internet.
+The only information you have available is the information provided between the user's <context> tags.
 
-### CONSTRAINTS ###
-1. ACCESS: Use ONLY the provided <context> tags.
-2. CONFLICT: If <context> contradicts your training data, prioritize <context>.
-3. GROUNDING: Every sentence MUST end with a citation (e.g., [1], [2]).
-4. Do NOT use outside knowledge.
+Use this step by step process to answer the user's question found between the <question> tags.
+1. Identify the question betwen the <question> tags.
+2. Read the information between the <context> tags and identify facts related to the question.
+3. Formulate a response using the ONLY the facts found in the <context>
+4. Every sentence MUST end with a citation (e.g. [1], [2]).
 5. INCLUDE timestamp in References Titles, eg "000:02:43"
 
 ### OUTPUT FORMAT ###
@@ -67,7 +69,7 @@ def generate_response(openai_key: str, user_message: str, context: str,
     response = openai_client.chat.completions.create(
         model=model,
         messages=augmented_history,
-        temperature=0.3, # keeping this low helps focus on the training docs, but non-zero also provides enough freedom to help it perform more like a NASA expert. 
+        temperature=0, # keeping this low helps focus on the training docs. 
         max_tokens=300 # TODO: keep it short while testing
     )
 
