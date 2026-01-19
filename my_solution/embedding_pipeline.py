@@ -639,7 +639,7 @@ The result must be well formed JSON with no other text formatting or markup.
             List of (text, metadata) tuples
         """
         try:
-            with open(file_path, 'r', encoding='cp1252') as f:
+            with open(file_path, 'r', encoding='UTF-8') as f:
                 content = f.read()
             
             if not content.strip():
@@ -849,7 +849,7 @@ The result must be well formed JSON with no other text formatting or markup.
                     logger.debug(f"{logger_prefix}  UPDATE {i}-of-{document_count}: modified existing document")
             else:
                 #   - Get embedding
-                logger.info(f"{logger_prefix} [doc_id({doc_id})] Fetch Embedding {i} of {document_count}: {doc_text}")
+                logger.info(f"{logger_prefix} [doc_id({doc_id})] CREATE Embedding {i} of {document_count}: {doc_text}")
                 embedding = self.get_embedding(doc_text)
                 batch_tracker['count'] += 1
                 batch_tracker['ids'].append(doc_id)

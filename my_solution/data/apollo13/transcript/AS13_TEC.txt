@@ -1060,7 +1060,7 @@ Okay. And we concur. The S-IVB is maneuvering at this time.
 Roger.
 
 002:58:32 CC
-And, Apollo 13, Houston. We’d like OMNI Alfa. Over.
+And, Apollo 13, Houston. We d like OMNI Alfa. Over.
 
 002:59:54 CC
 13, Houston. Now request OMNI Charlie.
@@ -1207,7 +1207,7 @@ Houston; Roger.
 Okay. You should be able to see down into the portion of the IU right now, Joe.
 
 003:18:21 CC
-Fred, Houston. We’d like trying going to AVERAGE on the TV for a minute or so.
+Fred, Houston. We d like trying going to AVERAGE on the TV for a minute or so.
 
 003:18:29 LMP
 Okay. You've AVERAGE, and a little yellow dust cap just floated by in front of us.
@@ -1612,13 +1612,13 @@ Okay. You want us to 0MNI Delta and MANUAL on the high gain to minus 60 and plus
 Stand by on that. We'll get a word.
 
 004:20:21 CC
-Okay, 13, this is Houston. You can turn the TV off anytime you’re ready. We’ve enjoyed the show.
+Okay, 13, this is Houston. You can turn the TV off anytime you re ready. We ve enjoyed the show.
 
 004:20:40 CC
-13, Houston. Before you secure the TV, we’d like to know whether that was maximum zoom, just for information-
+13, Houston. Before you secure the TV, we d like to know whether that was maximum zoom, just for information-
 
 004:20:48 LMP
-That’s affirm. Jim had it in MAX zoom.
+That s affirm. Jim had it in MAX zoom.
 
 004:20:51 CC
 Okay. Good deal. That was real good picture.
@@ -2731,7 +2731,7 @@ Maybe we could borrow some.
 (Laughter) Okay. Okay; West German Chancellor Willy Brandt, who witnessed your launch from the Cape yesterday, and President Nixon will complete their round of talks today. Brandt reportedly came to the U.S. to seek assurance from the President to go ahead with talks with the eastern European nations, especially East Germany, Poland, and Russia. Many air traffic controllers are Still out, but reports indicate that they are slowly returning to work, and you'll be happy to know the controllers here in the MOOR are still on the job.
 
 024:18:04 CDR
-…
+ 
 
 024:18:05 CC
 Go ahead.
@@ -9040,7 +9040,7 @@ And that's an Atlantic landing site.
 Atlantic landing?
 
 059:18:36 CC
-Affirmative. That's the pad that we've given you, but we may change our mind later on. We want you to have this info for now. And that's a minimum —
+Affirmative. That's the pad that we've given you, but we may change our mind later on. We want you to have this info for now. And that's a minimum  
 
 059:18:47 LMP
 Okay.
@@ -9781,7 +9781,7 @@ You're GO on the weights.
 Aquarius, Houston. We'd like you to recycle on the DAP load and change your DAP to 32021. Over.
 
 061:11:05 CC
-Okay, Aquarius. We're looking at your gimbal and we notice that we got a four-jet ullage loaded in the DAP and we gave you two jets on the pad. But, let's go with what we've got loaded. It'll be a four—jet ullage.
+Okay, Aquarius. We're looking at your gimbal and we notice that we got a four-jet ullage loaded in the DAP and we gave you two jets on the pad. But, let's go with what we've got loaded. It'll be a four jet ullage.
 
 061:11:18 LMP
 Okay.
@@ -11008,7 +11008,7 @@ Yes, we got ...
 How about that ... tank ...?
 
 065:30:23 CDR
-How much of that oxygen are you going to use for - 02 17 30 30 IMP We got - water glycol ... off. — need any more water? ... again?
+How much of that oxygen are you going to use for - 02 17 30 30 IMP We got - water glycol ... off.   need any more water? ... again?
 
 065:31:36 CDR
 ... out there?
@@ -11593,7 +11593,7 @@ And - we haven't even figured out yet the ... batteries, have we?
 Oh, I'm sure we have.
 
 068:42:30 CMP
-... - hundred ampere-hours. We had it figured out that we had 550 ampere—hours left. ... 02 20 42 43 CDR
+... - hundred ampere-hours. We had it figured out that we had 550 ampere hours left. ... 02 20 42 43 CDR
 
 068:42:48 CMP
 ... bigger than 133 hours. ... Oh, yes, I guess - Yes, he's ... the descent Thursday afternoon. He had it figured out that - for a splashdown at ... number of hours - 74 hours, and we've figured out that we - I don't know how we arrived at this - but he added up all the ...
@@ -13213,7 +13213,7 @@ I know. I don't know. I don't know where that 5 degrees .'..
 Cut it. 03 02 39 48 CDR
 
 074:40:24 CDR
-Oh-h. — that thing against the ...
+Oh-h.   that thing against the ...
 
 074:42:15 CDR
 I'm just going to try and close my eyes for a little.
@@ -13624,7 +13624,7 @@ Okay, you're talking in the CSM update book?
 Yes, that's affirm.
 
 075:33:13 LMP
-You got it right here. Make sure and scratch the ... - —
+You got it right here. Make sure and scratch the ... -  
 
 075:33:19 CDR
 ... - - 03 03 33 20 IMP - - though.
@@ -25024,7 +25024,7 @@ Okay. Copy that, Jim.
 Jim, Houston. Have you guys put on any extra clothes to try and ward off the nip of Jack Frost? Over.
 
 118:28:06 CDR
-Well, the lunar boots and two pair of underwear, and everyone is — crawl into their sleep restraints.
+Well, the lunar boots and two pair of underwear, and everyone is   crawl into their sleep restraints.
 
 118:28:14 CC
 Yes.
@@ -26911,7 +26911,7 @@ Okay. Perform step 39 of entry checklist page E/l-6.
 That's correct. Okay. The next is the command module RCS activation, and that's step 4-1 of page E/l-6.
 
 126:32:13 CMP
-Okay. The next is perform CSM - or CM RCS activation for step 4-1 of page E — E/l-6.
+Okay. The next is perform CSM - or CM RCS activation for step 4-1 of page E   E/l-6.
 
 126:32:28 CC
 That's correct.
@@ -32602,7 +32602,7 @@ Okay. We'd like the S-BAND POWER AMPLIFIER to OFF, center, at this time, Jim.
 OFF, center, is done.
 
 142:09:14 CC
-Okay. You're still looking real fat on power. We show you having over 30 amps on the water. If you do get into a bind and don't come up — that's amp-hours - don't, come up with recovery, you can always power down and you can always put the pyro batteries on the line if you need them after you're down.
+Okay. You're still looking real fat on power. We show you having over 30 amps on the water. If you do get into a bind and don't come up   that's amp-hours - don't, come up with recovery, you can always power down and you can always put the pyro batteries on the line if you need them after you're down.
 
 142:09:35 CDR
 Okay.
