@@ -42,6 +42,36 @@ python embedding_pipeline.py --openai-key $OPENAI_API_KEY --chunk-size=500 --chu
 python ./ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml --chroma-dir ./chroma_db_openai
 ```
 
+Score improvement tactics.
+    
+   1. ✔️ Faithfulness > 0.8
+      
+      Initial poor scores (< 0.6) in faithfulness were a result of the LLM using its own training data and not our provided context.
+      
+      * Strategy: We lowered `temperature` to 0.0 so the LLM would focus on the context with fewer attempts to be creative.
+        
+      * Strategy: We adjusted our prompt instructions to use a Chain of Thought strategy that asked the LLM to start by looking at our context and building the response in steps.
+        
+      Second pass poor scores (< 0.8) in faithfulness were a result of our data simply not having enough overlap with the question being asked.
+        
+      * Strategy: We added a `data/apollo13/mission-report.txt` extracted from https://archive.org/stream/apollo-13-mission-report/apollo-13-mission-report_djvu.txt
+
+   2. ✔️ Relevancy > 0.8
+        
+      Relevancy generally had strong scores (>= 0.8) from the begining once we fixed some unintended truncation bugs in our code.
+            
+      * Strategy: We used an enrichment algorithm to add fully expanded acronyms and speaker names to the text to increase hit chance.
+        We also tried to break up any text generically by sentence, and for the case of the transcripts logs we also tried to ensure
+        each time based communication would not be broken up. While it was not always possible due to chunk size limitations
+        the overlap helped ensure the RAG query to ChromaDB was always finding something related to the question.
+    
+   3. Bleu
+
+   3. Rouge
+
+   4. Context Precision
+
+
 4. Test LLM with sample questions and context.
 
 Our prompt defined in `llm_client.py` guides the LLM to rely only on the context provided, but through experimentation
