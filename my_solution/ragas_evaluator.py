@@ -116,11 +116,9 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     except:
         raise Exception(f"{test_id} Failed to retrieve documents: {e}")
     
-    context = ""
-    contexts_list = []
-    if docs_result and docs_result.get("documents"):
-        contexts_list = docs_result["documents"][0]
-        context = rag_client.format_context(documents=contexts_list, metadatas=docs_result["metadatas"][0])
+    metadatas = docs_result["metadatas"][0]
+    contexts_list = docs_result["documents"][0]
+    context = rag_client.format_context(documents=contexts_list, metadatas=metadatas)
     
     print(f"{LOG_PREFIX} {test_id} Query LLM for question ({question}) and formatted RAG context.")
     try:
@@ -138,7 +136,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
         scores = evaluate_response_quality(
             question=question,
             answer=answer,
-            contexts=contexts_list,
+            contexts=[context],
             ground_truth=[ground_truth]
         )
     except Exception as e:

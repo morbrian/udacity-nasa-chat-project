@@ -161,6 +161,20 @@ def retrieve_documents(collection, query: str, n_results: int = 3,
     # TODO: Return query results to caller
     return results
 
+def format_acronyms(acronym_mappings: dict) -> str:
+    """
+    Returns a formatted Markdown string of found acronyms
+    optimized for LLM context injection.
+    """
+    # Build the header and list
+    header = "### ACRONYMS LIBRARY\n<acronyms>\n"
+
+    lines = [f"- **{k}**: {v}" for k, v in acronym_mappings.items() if v]
+    
+    section = header + "\n".join(lines) + "\n</acronyms>\n"
+    
+    return section
+
 def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     """Format retrieved documents into context"""
     if not documents:
@@ -168,8 +182,10 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         return ""
     
     # DONE: Initialize list with header text for context section
-    context =["Reference Information"]
+    mission_data = []
+    mission_data.append("\n### MISSION DATA SECTIONS")
 
+    all_acronyms = {}
     # DONE: Loop through paired documents and their metadata using enumeration
     for i, (document, metadata) in enumerate(zip(documents, metadatas)):
         # DONE: Extract mission information from metadata with fallback value
@@ -187,24 +203,36 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
 
         # extract section
         section = metadata.get('section') or 'Section Unknown'
-
-        
+ 
         # DONE: Create formatted source header with index number and extracted information
-        source_header = f"\nReference Title: {i+1}: {source}:{mission}:{category}:{section}\n"
+        source_header = f"{i+1}: {source}:{mission}:{category}:{section}"
+
         # DONE: Add source header to context parts list
-        context.append(source_header)
+        mission_data.append(f"<context_section id=\"{source_header}\">")
         
         # DONE: Check document length and truncate if necessary
         truncated_document = f"{document[:500]}..." if len(document) < 500 else document
         # DONE: Add truncated or full document content to context parts list
-        context.append("Reference Context:")
-        context.append(truncated_document)
-        
+        mission_data.append(truncated_document)
+        mission_data.append("</context_section>\n")
+
+        # add to single list of all acronyms
+        stored_acronyms = metadata.get('acronyms') or None
+        if stored_acronyms is not None:
+            try:
+                acronym_mappings = json.loads(stored_acronyms)
+                all_acronyms |= (acronym_mappings or {})
+            except Exception as e:
+                print(f"Error: document {source_header} metadata has unparseable acronyms value: {stored_acronyms}")
 
     # DONE: Join all context parts with newlines and return formatted string
-    formatted_context = "\n".join(context)
+    all_mission_text = "\n".join(mission_data)
 
-    return formatted_context
+    acronym_text = format_acronyms(all_acronyms)
+
+    combined_context = acronym_text + all_mission_text
+    
+    return combined_context
 
 
 def main():

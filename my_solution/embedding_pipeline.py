@@ -67,6 +67,14 @@ class AcronymExpander:
         expansion = self.mapping.get(word)
         return f"{word} ({expansion})"
 
+    def filter_related_acronyms(self, text: dict):
+        """Extracts acronyms and definitions found in the text and returns them in a dictionary"""
+        # findall returns a unique list of all matches. 
+        found_keys = set(self._pattern.findall(text))
+        
+        # Return only the subset of the mapping that exists in the text
+        return {key: self.mapping[key] for key in found_keys if key in self.mapping}
+
     def process_text(self, text: str) -> str:
         """
         Scans text for acronyms and returns the augmented version.
@@ -214,7 +222,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 
         return title_page, introduction_text, acronym_text, transcript_text
 
-    def generic_chunk_text(self, text: str, metadata: Dict[str, Any], position_start=0) -> List[Tuple[str, Dict[str, Any]]]:
+    def generic_chunk_text(self, text: str, metadata: Dict[str, Any], position_start=0, acronym_expander=None) -> List[Tuple[str, Dict[str, Any]]]:
         """
         Split text into chunks with metadata
         
@@ -266,19 +274,19 @@ class ChromaEmbeddingPipelineTextOnly:
             if current_chunk:
                 chunks.append(current_chunk)
 
-
         meta_chunks = []
         for i, chunk in enumerate(chunks):
+            acronyms = acronym_expander.filter_related_acronyms(chunk) if acronym_expander is not None else None
             meta_chunks.append((
                 chunk,
                 metadata | {
                     "token_count": len(chunk),
-                    "position": position_start + i
+                    "position": position_start + i,
+                    "acronyms": json.dumps(acronyms) if acronyms else ""
                 }
             ))
 
         return meta_chunks
-
 
     def summarize_text(self, text: str, size: int, model: str = "gpt-3.5-turbo") -> List[Dict[str, Any]]:
         """
@@ -472,13 +480,20 @@ The result must be well formed JSON with no other text formatting or markup.
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-        # get the data_type so we can use an the most effective transform for the type
-        data_type = metadata['data_type']
-        if data_type == 'transcript':
-            return self.parse_transcript_document(text, metadata)
-        else:
-            return self.generic_chunk_text(text, metadata)
+        # Split text into sections of the transcript type of document.
+        _title_text, intro_text, acronym_text, _log_text = self.parse_transcript_sections(text)
 
+        if intro_text is not None or acronym_text is not None:
+            acronym_lookups = None
+            acronym_lookups = self.get_acronym_lookup(f"{intro_text}\n{acronym_text}")
+            acronym_expander = AcronymExpander(acronym_lookups)
+
+        # get the data_type so we can use an the most effective transform for the type
+        # data_type = metadata['data_type']
+        # if data_type == 'transcript':
+        #     return self.parse_transcript_document(text, metadata)
+        # else:
+        return self.generic_chunk_text(text=text, metadata=metadata, acronym_expander=acronym_expander)
 
     def check_document_exists(self, doc_id: str) -> bool:
         """
@@ -654,7 +669,6 @@ The result must be well formed JSON with no other text formatting or markup.
                 'mission': self.extract_mission_from_path(file_path),
                 'data_type': self.extract_data_type_from_path(file_path),
                 'document_category': self.extract_document_category_from_filename(file_path.name),
-                'file_size': len(content),
                 'processed_timestamp': datetime.now().isoformat()
             }
             
@@ -926,6 +940,7 @@ The result must be well formed JSON with no other text formatting or markup.
                 stats['documents_skipped'] += document_stats['skipped']
             except Exception as e:
                 # DONE: Handle errors gracefully
+                stats['errors'] += 1
                 traceback.print_exc()
                 logger.error(f"Error adding documents from path {file_path} to collection: {e}")
         
