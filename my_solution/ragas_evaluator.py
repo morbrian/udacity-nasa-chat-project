@@ -94,7 +94,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], g
     return results
 
 
-def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, collection, n_docs=3) -> Dict[str, Any]:
+def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, collection, n_docs=3, test_id="") -> Dict[str, Any]:
     """
     Sends the question to the LLM and evalutes the response against ground_truth using a ragas evaluator.
     
@@ -106,7 +106,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     :rtype: Dict[str, float]
     """
     
-    print(f"{LOG_PREFIX} Retrieve documents for question({question})")
+    print(f"{LOG_PREFIX} {test_id} Retrieve documents for question({question})")
     try:
         docs_result = rag_client.retrieve_documents(
             collection, 
@@ -114,7 +114,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             n_docs
         )
     except:
-        raise Exception(f"Failed to retrieve documents: {e}")
+        raise Exception(f"{test_id} Failed to retrieve documents: {e}")
     
     context = ""
     contexts_list = []
@@ -122,7 +122,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
         contexts_list = docs_result["documents"][0]
         context = rag_client.format_context(documents=contexts_list, metadatas=docs_result["metadatas"][0])
     
-    print(f"{LOG_PREFIX} Query LLM for question ({question}) and formatted RAG context.")
+    print(f"{LOG_PREFIX} {test_id} Query LLM for question ({question}) and formatted RAG context.")
     try:
         answer = llm_client.generate_response(
             openai_key=openai_api_key, 
@@ -131,9 +131,9 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             conversation_history=[]
         )
     except Exception as e:
-        raise Exception(f"Failed to query LLM with question {question}: {e}")
+        raise Exception(f"{test_id} Failed to query LLM with question {question}: {e}")
 
-    print(f"{LOG_PREFIX} Evaluate quality of answer {answer}")
+    print(f"{LOG_PREFIX} {test_id} Evaluate quality of answer {answer}")
     try:
         scores = evaluate_response_quality(
             question=question,
@@ -142,14 +142,16 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             ground_truth=[ground_truth]
         )
     except Exception as e:
-        raise Exception(f"Failed to complete evaluation of test case for {question}: {e}")
+        raise Exception(f"{test_id} Failed to complete evaluation of test case for {question}: {e}")
 
-    return {
+    record =  {
         "question": question,
         "ground_truth": ground_truth,
         "answer": answer,
         "scores": scores
     }
+
+    return record
 
 def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collection):
     """
@@ -172,26 +174,34 @@ def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collect
 
     results_bundle = []
     for i, case in enumerate(data['test_cases']):
+        print(f"\n{LOG_PREFIX} [{i}] 💼 === START Test Case ====")
         question = case.get('question', None)
         ground_truth = case.get('ground_truth', None)
         if question is None:
-            print(f"{LOG_PREFIX} Test Case {i} is missing question data")
+            print(f"{LOG_PREFIX} [{i}] Test Case {i} is missing question data")
             return
         if ground_truth is None:
-            print(f"{LOG_PREFIX} Test Case {i} is missing ground_truth data")
+            print(f"{LOG_PREFIX} [{i}] Test Case {i} is missing ground_truth data")
             return
-        results = evaluate_test_case(openai_api_key=openai_api_key, question=question, ground_truth=ground_truth, collection=collection)
+        print(f"{LOG_PREFIX} [{i}] ...... test phase in progress ......\n")
+        results = evaluate_test_case(openai_api_key=openai_api_key, question=question, ground_truth=ground_truth, collection=collection, test_id=f"[{i}]")
+        print(f"\n{LOG_PREFIX} [{i}] ...... test phase complete ......")
         results_bundle.append(results)
-    
+        print(f"{LOG_PREFIX} [{i}] ❔ Question: {results.get('question', '')}")
+        print(f"{LOG_PREFIX} [{i}] 💬 Answer: {results.get('answer', '')}")
+        print(f"{LOG_PREFIX} [{i}] 💯 Ground Truth: {results.get('ground_truth', '')}\n")
+        display_evaluation_metrics(results.get('scores', []), test_id=f"[{i}]")
+        print(f"\n{LOG_PREFIX} [{i}] 💼 === END Test Case ====")
+
     return results_bundle
 
-def display_evaluation_metrics(scores: Dict[str, float]):
+def display_evaluation_metrics(scores: Dict[str, float], test_id=""):
     """Display evaluation metrics in text format"""
     if "error" in scores:
-        print(f"{LOG_PREFIX} Evaluation Error: {scores['error']}")
+        print(f"{LOG_PREFIX} {test_id} Evaluation Error: {scores['error']}")
         return
     
-    print(f"{LOG_PREFIX} 📊 Response Quality")
+    print(f"{LOG_PREFIX} {test_id} 📊 Response Quality")
     
     for metric_name, score in scores.items():
         if isinstance(score, (int, float)):
@@ -205,7 +215,7 @@ def display_evaluation_metrics(scores: Dict[str, float]):
             
             label = metric_name.replace('_', ' ').title()
             
-            print(f"{LOG_PREFIX}     {icon}  {label}: {score}")
+            print(f"{LOG_PREFIX} {test_id}     {icon}  {label}: {score}")
 
 def valid_file(path_str):
     """Validates the file exists and is actually a file (not a directory)."""
@@ -256,15 +266,6 @@ def main():
         sys.exit()
     
     results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
-
-    averages = {}
-    for record in results_bundle:
-        print(f"\n{LOG_PREFIX} 💼 === START Test Case ====")
-        print(f"{LOG_PREFIX} ❔ Question: {record.get('question', '')}")
-        print(f"{LOG_PREFIX} 💬 Answer: {record.get('answer', '')}")
-        print(f"{LOG_PREFIX} 💯 Ground Truth: {record.get('ground_truth', '')}")
-        display_evaluation_metrics(record.get('scores', []))
-        print(f"\n{LOG_PREFIX} 💼 === END Test Case ====")
 
     print(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
     averages = {
