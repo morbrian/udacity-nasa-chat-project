@@ -115,7 +115,6 @@ class TranscriptProcessor:
                     "speaker_raw": speaker,
                     "speaker_full": enriched_speaker,
                     "original_text": f"{timestamp} {speaker}: {content}",
-                    "position": count
                 }
             }
 
@@ -128,7 +127,8 @@ class ChromaEmbeddingPipelineTextOnly:
                  collection_name: str = "nasa_space_missions_text",
                  embedding_model: str = "text-embedding-3-small",
                  chunk_size: int = 1000,
-                 chunk_overlap: int = 200):
+                 chunk_overlap: int = 200,
+                 batch_size: int = 500):
         """
         Initialize the embedding pipeline
         
@@ -164,7 +164,8 @@ class ChromaEmbeddingPipelineTextOnly:
             "collection_name": collection_name,
             "embedding_model": embedding_model,
             "chunk_size": chunk_size,
-            "chunk_overlap": chunk_overlap
+            "chunk_overlap": chunk_overlap,
+            "batch_size": batch_size
         }
 
         # DONE: Initialize ChromaDB client
@@ -454,6 +455,11 @@ The result must be well formed JSON with no other text formatting or markup.
         # the transcript processor will help us produce enriched sentence strings with abbreviations filled in to increase search relevance
         transcript_processor = TranscriptProcessor(acronym_lookups)
 
+        if intro_text is not None or acronym_text is not None:
+            # acronym_lookups = None
+            # acronym_lookups = self.get_acronym_lookup(f"{intro_text}\n{acronym_text}")
+            acronym_expander = AcronymExpander(acronym_lookups)
+
         sentences = []
         count = 0
         for record in transcript_processor.process_transcript(log_text, log_metadata):
@@ -461,7 +467,7 @@ The result must be well formed JSON with no other text formatting or markup.
             count += 1
         
         enriched_log_text = "\n".join(sentences)
-        transcript_chunks = self.generic_chunk_text(enriched_log_text, log_metadata, position_start=position_tracker)
+        transcript_chunks = self.generic_chunk_text(enriched_log_text, log_metadata, position_start=position_tracker, acronym_expander=acronym_expander)
         chunks.extend(transcript_chunks)
         position_tracker = len(chunks)
 
@@ -480,7 +486,7 @@ The result must be well formed JSON with no other text formatting or markup.
         Returns:
             List of (chunk_text, chunk_metadata) tuples
         """
-        # Split text into sections of the transcript type of document.
+        # # Split text into sections of the transcript type of document.
         _title_text, intro_text, acronym_text, _log_text = self.parse_transcript_sections(text)
 
         if intro_text is not None or acronym_text is not None:
@@ -493,6 +499,9 @@ The result must be well formed JSON with no other text formatting or markup.
         # if data_type == 'transcript':
         #     return self.parse_transcript_document(text, metadata)
         # else:
+        #     return self.generic_chunk_text(text=text, metadata=metadata)
+        
+        
         return self.generic_chunk_text(text=text, metadata=metadata, acronym_expander=acronym_expander)
 
     def check_document_exists(self, doc_id: str) -> bool:
@@ -602,6 +611,30 @@ The result must be well formed JSON with no other text formatting or markup.
             logger.error(f"Error getting file documents: {e}")
             return []
     
+    def get_embeddings(self, text: List[str]) -> List[List[float]]:
+        """
+        Get OpenAI embedding for text
+        
+        Args:
+            text: array of Text to embed
+            
+        Returns:
+            Array of Embedding vectors
+        """
+        try:
+            # DONE: Call OpenAI embeddings API
+            response = self.openai_client.embeddings.create(
+                model=self.parameters['embedding_model'],
+                input=text
+            )
+            embeddings = [item.embedding for item in response.data]
+            # DONE: Return embedding vector
+            return embeddings
+        except Exception as e:
+            # DONE: Add error handling
+            logger.error(f"Error creating embedding: {e}")
+            raise
+
     def get_embedding(self, text: str) -> List[float]:
         """
         Get OpenAI embedding for text
@@ -633,12 +666,12 @@ The result must be well formed JSON with no other text formatting or markup.
         """
         # DONE: Create consistent ID format
         # DONE: Use mission, source, and chunk_index
-        mission = metadata.get('mission', 'unknown')
-        source = metadata.get('source', 'unknown')
-        data_type = metadata.get('data_type', 'unknown')
-        category = metadata.get('category', 'unknown')
-        section = metadata.get('section', 'unkown')
-        position = metadata.get('position', 'unknown')
+        mission = metadata.get('mission', '')
+        source = metadata.get('source', '')
+        data_type = metadata.get('data_type', '')
+        category = metadata.get('category', '')
+        section = metadata.get('section', '')
+        position = metadata.get('position', '')
         doc_id = f"{mission}+{source}+{category}+{data_type}+{section}+{position}"
         # Format: mission_source_chunk_0001
         return doc_id
@@ -847,7 +880,7 @@ The result must be well formed JSON with no other text formatting or markup.
             
             # DONE: Handle different update modes (skip, update, replace)
             if doc_status and update_mode == 'skip':
-                logger.debug(f"{logger_prefix} [doc_id({doc_id})] SKIP {i}-of-{document_count}: already in collection")
+                # logger.debug(f"{logger_prefix} [doc_id({doc_id})] SKIP {i}-of-{document_count}: already in collection")
                 stats['skipped'] += 1
                 continue
 
@@ -863,25 +896,24 @@ The result must be well formed JSON with no other text formatting or markup.
                     logger.debug(f"{logger_prefix}  UPDATE {i}-of-{document_count}: modified existing document")
             else:
                 #   - Get embedding
-                logger.info(f"{logger_prefix} [doc_id({doc_id})] CREATE Embedding {i} of {document_count}: {doc_text}")
-                embedding = self.get_embedding(doc_text)
+                # logger.info(f"{logger_prefix} [doc_id({doc_id})] CREATE Embedding {i} of {document_count}: {doc_text}")
                 batch_tracker['count'] += 1
                 batch_tracker['ids'].append(doc_id)
                 batch_tracker['documents'].append(doc_text)
                 batch_tracker['metadatas'].append(doc_metadata)
-                batch_tracker['embeddings'].append(embedding)
-                logger.debug(f"{logger_prefix} [doc_id({doc_id})] ADD {i}-of-{document_count} TO BATCH: as item-{batch_tracker['count']} in batch")
+                # logger.debug(f"{logger_prefix} [doc_id({doc_id})] ADD {i}-of-{document_count} TO BATCH: as item-{batch_tracker['count']} in batch")
 
             # if the current batch is filled or we are on the final document
             # then add the batch to the vector db
             if batch_tracker['count'] == batch_size or i == document_count - 1:
                 if (batch_tracker['count'] > 0):
-                    logger.debug(f"PROCESS BATCH of size {batch_tracker['count']} at document-{i} of total-{document_count}")
+                    logger.info(f"PROCESS BATCH of size {batch_tracker['count']} at document-{i} of total-{document_count}")
+                    embeddings = self.get_embeddings(batch_tracker['documents'])
                     self.collection.add(
                         ids=batch_tracker['ids'],
                         documents=batch_tracker['documents'],
                         metadatas=batch_tracker['metadatas'],
-                        embeddings=batch_tracker['embeddings']
+                        embeddings=embeddings
                     )
                     stats['added'] += batch_tracker['count']
                     batch_tracker = {
@@ -1030,9 +1062,9 @@ def main():
     parser.add_argument('--chroma-dir', default='./chroma_db_openai', help='ChromaDB persist directory')
     parser.add_argument('--collection-name', default='nasa_space_missions_text', help='Collection name')
     parser.add_argument('--embedding-model', default='text-embedding-3-small', help='OpenAI embedding model')
-    parser.add_argument('--chunk-size', type=int, default=500, help='Text chunk size')
-    parser.add_argument('--chunk-overlap', type=int, default=100, help='Chunk overlap size')
-    parser.add_argument('--batch-size', type=int, default=50, help='Batch size for processing')
+    parser.add_argument('--chunk-size', type=int, default=250, help='Text chunk size')
+    parser.add_argument('--chunk-overlap', type=int, default=50, help='Chunk overlap size')
+    parser.add_argument('--batch-size', type=int, default=1000, help='Batch size for processing')
     parser.add_argument('--update-mode', choices=['skip', 'update', 'replace'], default='skip',
                        help='How to handle existing documents: skip, update, or replace')
     parser.add_argument('--test-query', help='Test query after processing')
@@ -1070,7 +1102,7 @@ def main():
     logger.info(f"Starting text data processing with update mode: {args.update_mode}")
     start_time = time.time()
     
-    stats = pipeline.process_all_text_data(args.data_path, update_mode=args.update_mode)
+    stats = pipeline.process_all_text_data(args.data_path, update_mode=args.update_mode, batch_size=args.batch_size)
     
     end_time = time.time()
     processing_time = end_time - start_time
