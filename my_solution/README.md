@@ -3,22 +3,24 @@
 A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabilities. Create a complete RAG pipeline from document processing to interactive chat interface.
 
 
+## Environment Setup 
+
 1. Setup Python Environment
 
-```
-export PY_VERSION=3.13.0
+   ```bash
+   export PY_VERSION=3.13.0
 
-# Set up Python version (if using pyenv)
-pyenv versions | grep -q "$PY_VERSION" || pyenv install $PY_VERSION
-pyenv local $PY_VERSION
+   # Set up Python version (if using pyenv)
+   pyenv versions | grep -q "$PY_VERSION" || pyenv install $PY_VERSION
+   pyenv local $PY_VERSION
 
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate
+   # Create and activate virtual environment
+   python -m venv venv
+   source venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
-```
+   # Install dependencies
+   pip install -r requirements.txt
+   ```
 
 2. Setup OpenAI API Key
 
@@ -26,21 +28,92 @@ pip install -r requirements.txt
 * Some parts require it to be available in the env var `OPENAI_API_KEY`
 * We support both Vocareum ("voc-") and standard ("sk-") OpenAI keys
 
-```
-export OPENAI_API_KEY="<your key>"
-```
+   ```bash
+   export OPENAI_API_KEY="<your key>"
+   ```
 
-3. Load the data using the embedding pipeline
+## Load Data and Smoke Test System
 
-```
-python embedding_pipeline.py --openai-key $OPENAI_API_KEY --chunk-size=500 --chunk-overlap=100 --update-mode replace --data-path ./data
-```
+1. Load the data using the embedding pipeline
 
-4. Run test cases from the provided data file `test-cases.yaml`
+   ```bash
+   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --update-mode replace --data-path ./data
+   ```
 
-```
-python ./ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml --chroma-dir ./chroma_db_openai
-```
+2. **Test LLM Client**
+
+  **Example-1:** Asking questions with no context should always cause the LLM to admin a lack of knowldge.
+   ```bash
+   python llm_client.py --question 'Who were the crew members of the Apollo 13?'
+    
+    ...<also prints context and question as output>
+    RESPONSE: I'm sorry, but I do not have access to that information.
+   ```
+
+  **Example-2:** Asking a question related to a provided context should provide a reasonable response ONLY from the context even if its fictional.
+  * This test demonstrates the LLM can pull facts from the context.
+   ```bash
+   python llm_client.py --question 'Who were the crew members of the Apollo 13?' \
+      --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
+
+      ...<also prints context and question as output>
+      RESPONSE: The crew members of the Apollo 13 mission were Mickey Mouse as the Lead Pilot, Donald Duck as Number Two, and Walt Disney in the role of Medicine Man. 
+      The mission took place in 1713.
+   ```
+
+  **Example-3:** This next test demonstrates the LLM is able to recognize when a somewhat related question does not have an answer in the context.
+   * The answer is in this test acknowledges a lack of knowledge, but also seems to have let its own training data leak into the response 
+   when it states "The Apollo 13 did not take place in 1713", because the context clearly state that as a fact the LLM should take as truth.
+   ```bash
+   python llm_client.py --question 'Who did NASA select as the first person to walk on the moon and what year did the Apollo 3 mission take place?' \
+      --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
+
+      ...<also prints context and question as output>
+      RESPONSE: NASA did not select the first person to walk on the moon in the provided context. The Apollo 13 mission did not take place in 1713; it is not mentioned in the context.
+      Therefore, I cannot provide information on the year the Apollo 3 mission took place.
+   ```
+
+3. **Test RAG Client**
+
+   The command below 
+   ```bash
+   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --stats-only
+   ```
+
+4. **Test Evaluation**
+
+   This is a short smoke test of the RAGAS implementation, a deeper dive on a larger dataset follows in the next section of this README.md
+* This example only tests the evaluate_response_quality(..) function with the static text inputs.
+* The more general use case for the ragas_evaluator is to run a number of tests defined in a file like `test-cases.yaml`
+   ```bash
+   python ./ragas_evaluator.py \
+       --question "What is a common color for grass?" \
+       --answer "Grass is commonly green" \
+       --contexts "The most comon color of grass is green."
+   ```
+
+## **Integration Testing**
+
+1. **Run the complete pipeline**:
+
+   This will run the chatbot server at http://localhost:8501
+
+   ```bash
+   # Process documents
+   python embedding_pipeline.py --openai-key YOUR_KEY --data-path ./data
+   
+   # Launch chat interface
+   streamlit run chat.py
+   ```
+
+
+## Evaluator Deep Dive
+
+1. Run test cases from the provided data file `test-cases.yaml`
+
+   ```bash
+   python ./ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml
+   ```
 
 Score improvement tactics.
     
@@ -82,8 +155,8 @@ when the provided context is not consistent with what it learned in training.
 
 Some example test scenarios (responses vary across runs for the same inputs):
 
-When no context is provided on the commandline the LLM uses its own training data.
-```
+**Example-1:** When no context is provided on the commandline the LLM uses its own training data.
+```bash
 python llm_client.py --question "Who were the crew members of the Apollo 13?"
 
 RESPONSE: The crew members of the Apollo 13 mission were Jim Lovell, Fred Haise, and Jack Swigert [1].
@@ -92,15 +165,15 @@ References:
 - [1] No Context
 ```
 
-When an insufficient context is provided the LLM will not make up an answer or use training data:
-```
+**Example-2:** When an insufficient context is provided the LLM will not make up an answer or use training data:
+```bash
 python llm_client.py --question "Who were the crew members of the Apollo 13?" --context "Nothing to see here"
 
 RESPONSE: I'm sorry, I cannot provide an answer as there is no relevant information provided in the context.
 ```
 
-When a factually incorrect context is provided the LLM may trust it (sometimes):
-```
+**Example-3:** When a factually incorrect context is provided the LLM may trust it (sometimes):
+```bash
 python llm_client.py \
     --question "Who were the crew members of the Apollo 13?" \
     --context "Apollo 13 crew was comprised of Mickey Mouse, Donald Duck and Batman in the year 1922"

@@ -239,10 +239,25 @@ def valid_openai_api_key(openai_api_key):
     else:
         raise argparse.ArgumentTypeError(f"{openai_api_key} does not match match the supported key types, keys must start with 'voc-' or 'sk-'")
 
+def print_averages(results_bundle):
+    print(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
+    averages = {
+        key: sum(item['scores'][key] for item in results_bundle) / len(results_bundle) 
+        for key in results_bundle[0]['scores']
+    }
+    display_evaluation_metrics(averages)
+
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='RAG System Evaluator')
-    parser.add_argument('--test-cases', type=valid_file, default='./test-cases.json', help='Path to test cases file')
+    parser.add_argument('--test-cases', type=valid_file, help='Path to test cases file')
+    parser.add_argument('--question', default='What is a common color for grass?', help='Question query for the LLM to answer')
+    parser.add_argument('--answer', default='Grass is commonly green.', help='Answer we would expect from the LLM')
+    parser.add_argument('--contexts', 
+                        nargs="+", 
+                        default=['The most common color of grass is green.'], 
+                        help='Question query for the LLM to answer' )
+
     parser.add_argument('--openai-key', type=valid_openai_api_key, required=True, help='OpenAI API key')
     parser.add_argument('--chroma-dir', type=valid_directory, default='./chroma_db_openai', help='ChromaDB persist directory')
     parser.add_argument('--collection-name', default='nasa_space_missions_text', help='Name of existing populated collection in local ChromaDB')
@@ -263,14 +278,16 @@ def main():
         print(f"{LOG_PREFIX} Failed to initialize RAG system: {e}")
         sys.exit()
     
-    results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
 
-    print(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
-    averages = {
-        key: sum(item['scores'][key] for item in results_bundle) / len(results_bundle) 
-        for key in results_bundle[0]['scores']
-    }
-    display_evaluation_metrics(averages)
+    try:
+        if args.test_cases:
+            results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
+            print_averages(results_bundle)
+        else:
+            results_bundle = evaluate_response_quality(question=args.question, answer=args.answer, contexts=args.contexts)
+            display_evaluation_metrics(results_bundle)
+    except Exception as e:
+        print(f"Failed to complete test cycle: {e}")
 
 if __name__ == "__main__":
     main()    

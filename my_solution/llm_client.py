@@ -99,8 +99,9 @@ def main():
     parser.add_argument('--question', 
                         default='Who were the crew members of the Apollo 13?', 
                         help='Path to data directories')
-    parser.add_argument('--context', 
-                        default='No Context', 
+    parser.add_argument('--contexts',
+                        nargs="+",
+                        default=['No Context'], 
                         help='Context information the LLM is allowed to use for answering questions.')
 
 
@@ -111,7 +112,7 @@ def main():
     response = generate_response(
         api_key, 
         args.question, 
-        args.context, 
+        '\n'.join(args.context), 
         []
     )
 
