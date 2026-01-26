@@ -38,9 +38,6 @@ from processors.text_generic import generic_chunk_text
 from services.openai import get_openai_client
 
 from observabilty.logger import get_logger, log_error, configure_logging_filename
-
-# setup the logger for the embedding_pipeline process
-configure_logging_filename('chroma_embedding_text_only.log')
 logger = get_logger(__name__)
 
 class ChromaEmbeddingPipelineTextOnly:
@@ -840,6 +837,9 @@ class ChromaEmbeddingPipelineTextOnly:
 
 def main():
     """Main function"""
+    # setup the logger for the embedding_pipeline process
+    configure_logging_filename('chroma_embedding_text_only.log')
+    
     parser = argparse.ArgumentParser(description='ChromaDB Embedding Pipeline for NASA Data')
     parser.add_argument('--data-path', default='.', help='Path to data directories')
     parser.add_argument('--openai-key', required=True, help='OpenAI API key')

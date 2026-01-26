@@ -14,9 +14,6 @@ import rag_client
 import llm_client
 
 from observabilty.logger import get_logger, log_error, configure_logging_filename
-
-# setup the logger for the embedding_pipeline process
-configure_logging_filename('chroma_embedding_text_only.log')
 logger = get_logger(__name__)
 
 # RAGAS imports
@@ -260,6 +257,9 @@ def print_averages(results_bundle):
 
 def main():
     """Main function"""
+    # setup the logger for the embedding_pipeline process
+    configure_logging_filename('ragas_evaluator.log')
+
     parser = argparse.ArgumentParser(description='RAG System Evaluator')
     parser.add_argument('--test-cases', type=valid_file, help='Path to test cases file')
     parser.add_argument('--question', default='What is a common color for grass?', help='Question query for the LLM to answer')

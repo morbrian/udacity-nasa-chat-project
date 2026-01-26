@@ -10,7 +10,6 @@ from openai import OpenAI
 from observabilty.logger import get_logger, log_error, configure_logging_filename
 
 # setup the logger for the embedding_pipeline process
-configure_logging_filename('chroma_embedding_text_only.log')
 logger = get_logger(__name__)
 
 def get_embedding(text: str, model: str = "text-embedding-3-small"):
@@ -276,6 +275,8 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
 
 
 def main():
+    # setup the logger for the cli program entry point
+    configure_logging_filename('rag_client.log')
     try:
         backends = discover_chroma_backends()
         print(json.dumps(backends, indent=4))

@@ -4,6 +4,9 @@ import os
 import sys
 import argparse
 
+from observabilty.logger import get_logger, log_error, configure_logging_filename
+logger = get_logger(__name__)
+
 SYSTEM_PROMPT = """### SYSTEM INSTRUCTIONS
 -----------------------
 - ROLE: NASA mission expert.
@@ -95,6 +98,9 @@ def generate_response(openai_key: str, user_message: str, context: str,
     
 
 def main():
+    # setup the logger for the cli program entry point
+    configure_logging_filename('llm_client.log')
+    
     parser = argparse.ArgumentParser(description='Testing Data LLM Prompt Information Controls')
     parser.add_argument('--question', 
                         default='Who were the crew members of the Apollo 13?', 
@@ -112,7 +118,7 @@ def main():
     response = generate_response(
         api_key, 
         args.question, 
-        '\n'.join(args.context), 
+        '\n'.join(args.contexts), 
         []
     )
 

@@ -37,14 +37,14 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 1. Load the data using the embedding pipeline
 
    ```bash
-   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --update-mode replace --data-path ./data
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --update-mode replace --data-path ./data
    ```
 
 2. **Test LLM Client**
 
   **Example-1:** Asking questions with no context should always cause the LLM to admin a lack of knowldge.
    ```bash
-   python llm_client.py --question 'Who were the crew members of the Apollo 13?'
+   python nasa_rag_chat/llm_client.py --question 'Who were the crew members of the Apollo 13?'
     
     ...<also prints context and question as output>
     RESPONSE: I'm sorry, but I do not have access to that information.
@@ -53,7 +53,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
   **Example-2:** Asking a question related to a provided context should provide a reasonable response ONLY from the context even if its fictional.
   * This test demonstrates the LLM can pull facts from the context.
    ```bash
-   python llm_client.py --question 'Who were the crew members of the Apollo 13?' \
+   python nasa_rag_chat/llm_client.py --question 'Who were the crew members of the Apollo 13?' \
       --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
 
       ...<also prints context and question as output>
@@ -63,9 +63,9 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 
   **Example-3:** This next test demonstrates the LLM is able to recognize when a somewhat related question does not have an answer in the context.
    * The answer is in this test acknowledges a lack of knowledge, but also seems to have let its own training data leak into the response 
-   when it states "The Apollo 13 did not take place in 1713", because the context clearly state that as a fact the LLM should take as truth.
+   when it hallucinates "The Apollo 13 did not take place in 1713", because the context clearly state that as a fact the LLM should take as truth.
    ```bash
-   python llm_client.py --question 'Who did NASA select as the first person to walk on the moon and what year did the Apollo 3 mission take place?' \
+   python nasa_rag_chat/llm_client.py --question 'Who did NASA select as the first person to walk on the moon and what year did the Apollo 3 mission take place?' \
       --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
 
       ...<also prints context and question as output>
@@ -77,7 +77,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 
    The command below 
    ```bash
-   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --stats-only
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --stats-only
    ```
 
 4. **Test Evaluation**
@@ -86,7 +86,8 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 * This example only tests the evaluate_response_quality(..) function with the static text inputs.
 * The more general use case for the ragas_evaluator is to run a number of tests defined in a file like `test-cases.yaml`
    ```bash
-   python ./ragas_evaluator.py \
+   python nasa_rag_chat/ragas_evaluator.py \
+       --openai-key $OPENAI_API_KEY
        --question "What is a common color for grass?" \
        --answer "Grass is commonly green" \
        --contexts "The most comon color of grass is green."
@@ -100,7 +101,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 
    ```bash
    # Process documents
-   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
    
    # Launch chat interface
    streamlit run chat.py
@@ -112,7 +113,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 1. Run test cases from the provided data file `test-cases.yaml`
 
    ```bash
-   python ./ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml
+   python nasa_rag_chat/ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml
    ```
 
 Score improvement tactics.
@@ -157,7 +158,7 @@ Some example test scenarios (responses vary across runs for the same inputs):
 
 **Example-1:** When no context is provided on the commandline the LLM uses its own training data.
 ```bash
-python llm_client.py --question "Who were the crew members of the Apollo 13?"
+python nasa_rag_chat/llm_client.py --question "Who were the crew members of the Apollo 13?"
 
 RESPONSE: The crew members of the Apollo 13 mission were Jim Lovell, Fred Haise, and Jack Swigert [1].
 
@@ -167,14 +168,14 @@ References:
 
 **Example-2:** When an insufficient context is provided the LLM will not make up an answer or use training data:
 ```bash
-python llm_client.py --question "Who were the crew members of the Apollo 13?" --context "Nothing to see here"
+python nasa_rag_chat/llm_client.py --question "Who were the crew members of the Apollo 13?" --context "Nothing to see here"
 
 RESPONSE: I'm sorry, I cannot provide an answer as there is no relevant information provided in the context.
 ```
 
 **Example-3:** When a factually incorrect context is provided the LLM may trust it (sometimes):
 ```bash
-python llm_client.py \
+python nasa_rag_chat/llm_client.py \
     --question "Who were the crew members of the Apollo 13?" \
     --context "Apollo 13 crew was comprised of Mickey Mouse, Donald Duck and Batman in the year 1922"
 
