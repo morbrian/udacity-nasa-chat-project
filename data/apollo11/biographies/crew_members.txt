@@ -1,0 +1,46 @@
+## 🚀 Apollo 11 Crew Biographies
+
+> **Source:** [NASA Mission: Apollo 11](https://www.nasa.gov/mission/apollo-11/)
+
+---
+
+### **Neil A. Armstrong**
+*Commander*
+
+As the **first human to set foot on the Moon**, Armstrong’s legacy is monumental. He began his career in 1955 as an aeronautical research scientist with the NACA (NASA’s predecessor).
+
+* **Selected:** Astronaut Group 2 (1962).
+* **Previous Flight:** Gemini 8 (1966).
+* **Role:** Commanded the Apollo 11 mission and piloted the Lunar Module *Eagle* to the surface.
+
+---
+
+### **Edwin “Buzz” Aldrin**
+*Lunar Module Pilot*
+
+Dr. Aldrin was a highly decorated fighter pilot in the Korean War and an engineer before becoming the **second human to walk on the lunar surface**.
+
+* **Selected:** Astronaut Group 3 (1963).
+* **Previous Flight:** Gemini XII (1966).
+* **Role:** Piloted the Lunar Module and performed the mission's EVA (Extravehicular Activity) alongside Armstrong.
+
+---
+
+### **Michael Collins**
+*Command Module Pilot*
+
+Often called the "loneliest man in history" during the mission, Collins remained in lunar orbit to ensure his crewmates had a way home. He logged a total of **266 hours in space**.
+
+* **Selected:** Astronaut Group 3 (1963).
+* **Previous Flight:** Gemini X (1966).
+* **Role:** Piloted the Command Module *Columbia* in orbit around the Moon.
+
+---
+
+### **Quick Comparison**
+
+| Astronaut | Mission Role | Previous Spaceflight | Key Achievement |
+| :--- | :--- | :--- | :--- |
+| **Neil Armstrong** | Commander | Gemini 8 | First human on the Moon |
+| **Buzz Aldrin** | Lunar Module Pilot | Gemini XII | Second human on the Moon |
+| **Michael Collins** | Command Module Pilot | Gemini X | Stayed in lunar orbit |

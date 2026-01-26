@@ -100,7 +100,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
 
    ```bash
    # Process documents
-   python embedding_pipeline.py --openai-key YOUR_KEY --data-path ./data
+   python embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
    
    # Launch chat interface
    streamlit run chat.py

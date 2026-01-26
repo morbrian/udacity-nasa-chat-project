@@ -7,6 +7,12 @@ import json
 import sys
 from openai import OpenAI
 
+from observabilty.logger import get_logger, log_error, configure_logging_filename
+
+# setup the logger for the embedding_pipeline process
+configure_logging_filename('chroma_embedding_text_only.log')
+logger = get_logger(__name__)
+
 def get_embedding(text: str, model: str = "text-embedding-3-small"):
     """
     Get text embedding using model
@@ -30,7 +36,7 @@ def get_embedding(text: str, model: str = "text-embedding-3-small"):
             api_key=api_key
         )
     else:
-        error_message = f"""ERROR: Unknown client key type: {api_key[:3]} - Expected key types start with 'sk-' or 'voc-'"""
+        error_message = f"""Unknown client key type: {api_key[:3]} - Expected key types start with 'sk-' or 'voc-'"""
         raise ValueError(error_message)
     
     try:
@@ -44,8 +50,7 @@ def get_embedding(text: str, model: str = "text-embedding-3-small"):
         return embedding
     except Exception as e:
         # DONE: Add error handling
-        print(f"Error creating embedding: {e}")
-        raise
+        raise Exception("Error creating embeding")
 
 
 def discover_chroma_backends() -> Dict[str, Dict[str, str]]:
@@ -89,11 +94,11 @@ def discover_chroma_backends() -> Dict[str, Dict[str, str]]:
                 backends[identifier_key] = info
         
         except Exception as e:
+            # DONE: Handle connection or access errors gracefully
+            logger.warning(f"❌ Error generating RAG response from folder {chroma_dir}", e)
+            # DONE: Create fallback entry for inaccessible directories
             full_error = str(e)
             truncated_error = (full_error[:100] + '..') if len(full_error) > 100 else full_error
-            # DONE: Handle connection or access errors gracefully
-            print(f"❌ Error generating RAG response from folder {chroma_dir}: {truncated_error}")
-            # DONE: Create fallback entry for inaccessible directories
             backends[f"{chroma_dir}__error"] = {
                 "chroma_dir": str(chroma_dir),
                 "name": "error",
@@ -131,10 +136,48 @@ def initialize_rag_system(chroma_dir: str, collection_name: str):
             False,
             e
         )
+    
+def get_adjacent_documents_for_ids(collection, doc_ids):
+    """Uses the provided meta"""
+    all_expanded_ids = []
+    previous=1
+    next=1
+
+    # results["metadatas"][0] is the list of metadata dicts from the first query
+    for doc_id in doc_ids:
+        if not doc_id:
+            continue
+        
+        # Split from the right once to separate the prefix from the index
+        # "xxx:yyy:zzz:22" -> ["xxx:yyy:zzz", "22"]
+        prefix, index_str = doc_id.rsplit(":", 1)
+        idx = int(index_str)
+        
+        # Calculate neighbors
+        # Using max(0, ...) handles the lower bound
+        # We will handle the upper bound (max length) later during the .get() call
+        neighbor_indices = [idx - previous, idx, idx + next]
+        
+        # Create the new IDs, filtering out negatives
+        expanded = [f"{prefix}:{i}" for i in neighbor_indices if i >= 0]
+        all_expanded_ids.extend(expanded)
+
+    # De-duplicate while preserving order (if multiple hits share neighbors)
+    unique_ids = list(dict.fromkeys(all_expanded_ids))
+
+    results = collection.get(ids=unique_ids)
+
+    return results
 
 def retrieve_documents(collection, query: str, n_results: int = 3, 
                       mission_filter: Optional[str] = None) -> Optional[Dict]:
-    """Retrieve relevant documents from ChromaDB with optional filtering"""
+    """Retrieve relevant documents from ChromaDB with optional filtering
+    
+        The 'expand_context' parameter, when True, will use our doc_id nameing convention to pull
+        the nearby documents from before and after n_results semantic matches.
+        * disadvantage: this will esentially increase the result set by 3 x n_results.
+        * advantage: allows us to store smaller focused chunks while still finding large blocks of context.
+    """
 
     # DONE: Initialize filter variable to None (represents no filtering)
     filter = None
@@ -143,10 +186,7 @@ def retrieve_documents(collection, query: str, n_results: int = 3,
     if mission_filter is not None and mission_filter != "all":
         # DONE: If filter conditions are met, create filter dictionary with appropriate field-value pairs
         filter = {
-            'mission': mission_filter['mission'],
-            'data_type': mission_filter['data_type'],
-            'doc_category': mission_filter['doc_category'],
-            'file_type': mission_filter['file_type']
+            'mission': mission_filter
         }
 
     # DONE: Execute database query with the following parameters:
@@ -158,7 +198,7 @@ def retrieve_documents(collection, query: str, n_results: int = 3,
         where=filter # DONE: Apply conditional filter (None for no filtering, dictionary for specific filtering)
     )
 
-    # TODO: Return query results to caller
+    # DONE: Return query results to caller
     return results
 
 def format_acronyms(acronym_mappings: dict) -> str:
@@ -178,7 +218,7 @@ def format_acronyms(acronym_mappings: dict) -> str:
 def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     """Format retrieved documents into context"""
     if not documents:
-        print("NO DOCUMENTS FOUND")
+        logger.warning("NO DOCUMENTS FOUND")
         return ""
     
     # DONE: Initialize list with header text for context section
@@ -205,7 +245,7 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         section = metadata.get('section') or 'Section Unknown'
  
         # DONE: Create formatted source header with index number and extracted information
-        source_header = f"{i+1}: {source}:{mission}:{category}:{section}"
+        source_header = f"{i+1}: {metadata.get('file_path')}:{metadata.get('position')}"
 
         # DONE: Add source header to context parts list
         mission_data.append(f"<context_section id=\"{source_header}\">")
@@ -223,7 +263,7 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
                 acronym_mappings = json.loads(stored_acronyms)
                 all_acronyms |= (acronym_mappings or {})
             except Exception as e:
-                print(f"Error: document {source_header} metadata has unparseable acronyms value: {stored_acronyms}")
+                logger.warning(f"Document {source_header} metadata has unparseable acronyms value: {stored_acronyms}", e)
 
     # DONE: Join all context parts with newlines and return formatted string
     all_mission_text = "\n".join(mission_data)
@@ -240,7 +280,7 @@ def main():
         backends = discover_chroma_backends()
         print(json.dumps(backends, indent=4))
     except Exception as e:
-       print(f"Failed to test backends: {e}") 
+       log_error(logger, f"Failed to test backends: {e}", e) 
 
 
 if __name__ == "__main__":

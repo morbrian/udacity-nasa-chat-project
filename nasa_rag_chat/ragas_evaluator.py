@@ -13,6 +13,12 @@ from pathlib import Path
 import rag_client
 import llm_client
 
+from observabilty.logger import get_logger, log_error, configure_logging_filename
+
+# setup the logger for the embedding_pipeline process
+configure_logging_filename('chroma_embedding_text_only.log')
+logger = get_logger(__name__)
+
 # RAGAS imports
 try:
     from ragas import SingleTurnSample
@@ -106,21 +112,26 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     :rtype: Dict[str, float]
     """
     
-    print(f"{LOG_PREFIX} {test_id} Retrieve documents for question({question})")
+    logger.info(f"{LOG_PREFIX} {test_id} Retrieve documents for question({question})")
     try:
         docs_result = rag_client.retrieve_documents(
             collection, 
             question, 
             n_docs
         )
-    except:
+    except Exception as e:
         raise Exception(f"{test_id} Failed to retrieve documents: {e}")
-    
-    metadatas = docs_result["metadatas"][0]
-    contexts_list = docs_result["documents"][0]
+    try:
+        doc_ids = [metadata.get("doc_id") for metadata in docs_result["metadatas"][0]]
+        expanded_results = rag_client.get_adjacent_documents_for_ids(collection, doc_ids)
+        contexts_list = expanded_results["documents"]
+        metadatas = expanded_results["metadatas"]
+    except Exception as e:
+        raise Exception(f"{test_id} Failed to expand context with additional documents: {e}")
+
     context = rag_client.format_context(documents=contexts_list, metadatas=metadatas)
     
-    print(f"{LOG_PREFIX} {test_id} Query LLM for question ({question}) and formatted RAG context.")
+    logger.info(f"{LOG_PREFIX} {test_id} Query LLM for question ({question}) and formatted RAG context.")
     try:
         answer = llm_client.generate_response(
             openai_key=openai_api_key, 
@@ -131,7 +142,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     except Exception as e:
         raise Exception(f"{test_id} Failed to query LLM with question {question}: {e}")
 
-    print(f"{LOG_PREFIX} {test_id} Evaluate quality of answer {answer}")
+    logger.info(f"{LOG_PREFIX} {test_id} Evaluate quality of answer {answer}")
     try:
         scores = evaluate_response_quality(
             question=question,
@@ -172,34 +183,34 @@ def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collect
 
     results_bundle = []
     for i, case in enumerate(data['test_cases']):
-        print(f"\n{LOG_PREFIX} [{i}] 💼 === START Test Case ====")
+        logger.info(f"\n{LOG_PREFIX} [{i}] 💼 === START Test Case ====")
         question = case.get('question', None)
         ground_truth = case.get('ground_truth', None)
         if question is None:
-            print(f"{LOG_PREFIX} [{i}] Test Case {i} is missing question data")
+            logger.info(f"{LOG_PREFIX} [{i}] Test Case {i} is missing question data")
             return
         if ground_truth is None:
-            print(f"{LOG_PREFIX} [{i}] Test Case {i} is missing ground_truth data")
+            logger.info(f"{LOG_PREFIX} [{i}] Test Case {i} is missing ground_truth data")
             return
-        print(f"{LOG_PREFIX} [{i}] ...... test phase in progress ......\n")
+        logger.info(f"{LOG_PREFIX} [{i}] ...... test phase in progress ......\n")
         results = evaluate_test_case(openai_api_key=openai_api_key, question=question, ground_truth=ground_truth, collection=collection, test_id=f"[{i}]")
-        print(f"\n{LOG_PREFIX} [{i}] ...... test phase complete ......")
+        logger.info(f"\n{LOG_PREFIX} [{i}] ...... test phase complete ......")
         results_bundle.append(results)
-        print(f"{LOG_PREFIX} [{i}] ❔ Question: {results.get('question', '')}")
-        print(f"{LOG_PREFIX} [{i}] 💬 Answer: {results.get('answer', '')}")
-        print(f"{LOG_PREFIX} [{i}] 💯 Ground Truth: {results.get('ground_truth', '')}\n")
+        logger.info(f"{LOG_PREFIX} [{i}] ❔ Question: {results.get('question', '')}")
+        logger.info(f"{LOG_PREFIX} [{i}] 💬 Answer: {results.get('answer', '')}")
+        logger.info(f"{LOG_PREFIX} [{i}] 💯 Ground Truth: {results.get('ground_truth', '')}\n")
         display_evaluation_metrics(results.get('scores', []), test_id=f"[{i}]")
-        print(f"\n{LOG_PREFIX} [{i}] 💼 === END Test Case ====")
+        logger.info(f"\n{LOG_PREFIX} [{i}] 💼 === END Test Case ====")
 
     return results_bundle
 
 def display_evaluation_metrics(scores: Dict[str, float], test_id=""):
     """Display evaluation metrics in text format"""
     if "error" in scores:
-        print(f"{LOG_PREFIX} {test_id} Evaluation Error: {scores['error']}")
+        logger.warning(f"{LOG_PREFIX} {test_id} Evaluation Error: {scores['error']}")
         return
     
-    print(f"{LOG_PREFIX} {test_id} 📊 Response Quality")
+    logger.info(f"{LOG_PREFIX} {test_id} 📊 Response Quality")
     
     for metric_name, score in scores.items():
         if isinstance(score, (int, float)):
@@ -213,7 +224,7 @@ def display_evaluation_metrics(scores: Dict[str, float], test_id=""):
             
             label = metric_name.replace('_', ' ').title()
             
-            print(f"{LOG_PREFIX} {test_id}     {icon}  {label}: {score}")
+            logger.info(f"{LOG_PREFIX} {test_id}     {icon}  {label}: {score}")
 
 def valid_file(path_str):
     """Validates the file exists and is actually a file (not a directory)."""
@@ -240,7 +251,7 @@ def valid_openai_api_key(openai_api_key):
         raise argparse.ArgumentTypeError(f"{openai_api_key} does not match match the supported key types, keys must start with 'voc-' or 'sk-'")
 
 def print_averages(results_bundle):
-    print(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
+    logger.info(f"\n\n{LOG_PREFIX} === TOTAL AVERAGES OF {len(results_bundle)} TEST CASES ===") 
     averages = {
         key: sum(item['scores'][key] for item in results_bundle) / len(results_bundle) 
         for key in results_bundle[0]['scores']
@@ -268,17 +279,16 @@ def main():
     os.environ["OPENAI_API_KEY"] = args.openai_key
     os.environ["CHROMA_OPENAI_API_KEY"] = args.openai_key
 
-    print(f"{LOG_PREFIX} Initialize RAG system...")
+    logger.info(f"{LOG_PREFIX} Initialize RAG system...")
     collection = None
     try:
        collection, success, error = rag_client.initialize_rag_system(args.chroma_dir, args.collection_name)
        if not success:
            raise Exception(f"RAG system did not throw an exception but reports an initialization failure {error}")
     except Exception as e:
-        print(f"{LOG_PREFIX} Failed to initialize RAG system: {e}")
+        log_error(f"{LOG_PREFIX} Failed to initialize RAG system: {e}")
         sys.exit()
     
-
     try:
         if args.test_cases:
             results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
@@ -287,7 +297,7 @@ def main():
             results_bundle = evaluate_response_quality(question=args.question, answer=args.answer, contexts=args.contexts)
             display_evaluation_metrics(results_bundle)
     except Exception as e:
-        print(f"Failed to complete test cycle: {e}")
+        log_error(logger, f"Failed to complete test cycle: {e}", e)
 
 if __name__ == "__main__":
     main()    
