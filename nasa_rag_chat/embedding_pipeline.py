@@ -33,8 +33,7 @@ import re
 from typing import Generator, Dict, Any
 from pprint import pprint
 
-from processors.text_transcript import get_acronym_lookup, AcronymExpander, TranscriptProcessor
-from processors.text_generic import generic_chunk_text
+from processors.text_generic import generic_chunk_text, get_comm_bounds
 from services.openai import get_openai_client
 
 from observabilty.logger import get_logger, log_error, configure_logging_filename
@@ -271,18 +270,22 @@ class ChromaEmbeddingPipelineTextOnly:
 
         chunks = generic_chunk_text(text=text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
+        # add position id as a the sequence number of the document
         tuples = [(chunk, metadata | { "position": i }) for i, chunk in enumerate(chunks)]
+
+        # generate doc_id from the metadata for the document
         tuples = [(chunk, metadata | { "doc_id": self.generate_document_id('', metadata)}) for chunk, metadata in tuples]
 
-        # TODO:
-        #  - find all timestamps in text
-        #    - take first found and last found
-        #    - save as strings for start_time and end_time
-        #       - i have not plans to search based on time ranges -- but if we do, we'll need to conver to numbers
-        #    - when we have timestamps, we'll use them in the references also
+        # set fields commStart and commEnd if there are any timestamps in the text
+        tuples = [
+            (
+                text, 
+                {**metadata, **bounds} if (bounds := get_comm_bounds(text)) else metadata 
+            )
+            for text, metadata in tuples
+        ]
 
         return tuples
-
 
 
     def check_document_exists(self, doc_id: str) -> bool:
@@ -661,8 +664,7 @@ class ChromaEmbeddingPipelineTextOnly:
             doc_status = self.check_document_exists(doc_id)
             
             # DONE: Handle different update modes (skip, update, replace)
-            if doc_status and update_mode == 'skip':
-                # logger.debug(f"{logger_prefix} [doc_id({doc_id})] SKIP {i}-of-{document_count}: already in collection")
+            if doc_status and update_mode == 'skip' or not doc_text:
                 stats['skipped'] += 1
                 continue
 
@@ -678,7 +680,8 @@ class ChromaEmbeddingPipelineTextOnly:
                     logger.debug(f"{logger_prefix}  UPDATE {i}-of-{document_count}: modified existing document")
             else:
                 #   - Get embedding
-                # logger.info(f"{logger_prefix} [doc_id({doc_id})] CREATE Embedding {i} of {document_count}: {doc_text}")
+                if batch_tracker['count'] == 0:
+                    build_batch_start_time = time.time()
                 batch_tracker['count'] += 1
                 batch_tracker['ids'].append(doc_id)
                 batch_tracker['documents'].append(doc_text)
@@ -689,8 +692,14 @@ class ChromaEmbeddingPipelineTextOnly:
             # then add the batch to the vector db
             if batch_tracker['count'] == batch_size or i == document_count - 1:
                 if (batch_tracker['count'] > 0):
-                    logger.info(f"PROCESS BATCH of size {batch_tracker['count']} at document-{i} of total-{document_count}")
+                    build_batch_end_time = time.time()
+                    build_batch_duration = build_batch_end_time - build_batch_start_time
+                    logger.info(f"Filled batch of size {batch_tracker['count']} in {build_batch_duration:.2f} seconds at document-{i} of total-{document_count}")
+                    embeddings_call_start = time.time()
                     embeddings = self.get_embeddings(batch_tracker['documents'])
+                    embeddings_call_end = time.time()
+                    embeddings_call_duration = embeddings_call_end - embeddings_call_start
+                    logger.info(f"Finished creating {len(batch_tracker['documents'])} embeddings in {embeddings_call_duration:.2f} seconds")
                     self.collection.add(
                         ids=batch_tracker['ids'],
                         documents=batch_tracker['documents'],
@@ -737,6 +746,7 @@ class ChromaEmbeddingPipelineTextOnly:
         text_files = self.scan_text_files_only(base_path)
         # DONE: Loop through each file
         for file_path in text_files:
+            start = time.time()
             try:
                 # DONE: Process file and add to collection
                 documents = self.process_text_file(file_path)
@@ -756,7 +766,10 @@ class ChromaEmbeddingPipelineTextOnly:
                 # DONE: Handle errors gracefully
                 stats['errors'] += 1
                 log_error(logger, f"Error adding documents from path {file_path} to collection: {e}", e)
-        
+
+            end = time.time()
+            duration = end - start
+            logger.info(f"Finished processing {file_path} in {duration} sections")
         return stats
     
     def get_collection_info(self) -> Dict[str, Any]:

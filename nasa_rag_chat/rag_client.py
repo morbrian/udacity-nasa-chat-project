@@ -169,7 +169,7 @@ def get_adjacent_documents_for_ids(collection, doc_ids):
     return results
 
 def retrieve_documents(collection, query: str, n_results: int = 3, 
-                      mission_filter: Optional[str] = None) -> Optional[Dict]:
+                      mission_filter: Optional[str] = None, include_adjacent=True) -> Optional[Dict]:
     """Retrieve relevant documents from ChromaDB with optional filtering
     
         The 'expand_context' parameter, when True, will use our doc_id nameing convention to pull
@@ -196,6 +196,13 @@ def retrieve_documents(collection, query: str, n_results: int = 3,
         n_results=n_results, # DONE: Set maximum number of results to return
         where=filter # DONE: Apply conditional filter (None for no filtering, dictionary for specific filtering)
     )
+    if include_adjacent:
+        try:
+            doc_ids = [metadata.get("doc_id") for metadata in results["metadatas"][0]]
+            expanded_results = get_adjacent_documents_for_ids(collection, doc_ids)
+            results = { "documents": [expanded_results["documents"]], "metadatas": [expanded_results["metadatas"]]}
+        except Exception as e:
+            raise Exception(f"Failed to expand context with adjacent documents: {e}")
 
     # DONE: Return query results to caller
     return results
@@ -244,32 +251,25 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         section = metadata.get('section') or 'Section Unknown'
  
         # DONE: Create formatted source header with index number and extracted information
-        source_header = f"{i+1}: {metadata.get('file_path')}:{metadata.get('position')}"
+        commStart, commEnd = metadata.get('commStart', ''), metadata.get('commEnd', '')
+        refTimeRange = f"Times: {commStart} - {commEnd}" if commStart or commEnd else ""
+        ref_id = f"{i+1}"
+        ref_file_path = f"{metadata.get('file_path')}"
 
         # DONE: Add source header to context parts list
-        mission_data.append(f"<context_section id=\"{source_header}\">")
+        context_section_header = f"<context id=\"{ref_id}\" filePath=\"{ref_file_path}\" timeRange=\"{refTimeRange}\">"
+        mission_data.append(context_section_header)
         
         # DONE: Check document length and truncate if necessary
-        truncated_document = f"{document[:500]}..." if len(document) < 500 else document
+        truncated_text = f"{document[:500]}..." if len(document) < 500 else document
         # DONE: Add truncated or full document content to context parts list
-        mission_data.append(truncated_document)
-        mission_data.append("</context_section>\n")
-
-        # add to single list of all acronyms
-        stored_acronyms = metadata.get('acronyms') or None
-        if stored_acronyms is not None:
-            try:
-                acronym_mappings = json.loads(stored_acronyms)
-                all_acronyms |= (acronym_mappings or {})
-            except Exception as e:
-                logger.warning(f"Document {source_header} metadata has unparseable acronyms value: {stored_acronyms}", e)
+        mission_data.append(truncated_text)
+        mission_data.append("</context>\n")
 
     # DONE: Join all context parts with newlines and return formatted string
     all_mission_text = "\n".join(mission_data)
 
-    acronym_text = format_acronyms(all_acronyms)
-
-    combined_context = acronym_text + all_mission_text
+    combined_context = all_mission_text
     
     return combined_context
 

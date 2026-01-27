@@ -39,6 +39,21 @@ def generic_chunk_text(
     clean_text = re.sub(r'\n{3,}', '\n\n', text)
     return splitter.split_text(clean_text)
 
+# Compile ONCE at the module level
+TIMESTAMP_PATTERN = re.compile(r"(\d{3}:\d{2}:\d{2})\s+[A-Z]{2,4}")
+
+def get_comm_bounds(text):
+    matches = list(TIMESTAMP_PATTERN.finditer(text))
+    if not matches:
+        return None
+    
+    # matches[0][1] gets the first capture group of the first match
+    # matches[-1][1] gets the first capture group of the last match
+    return {
+        "commStart": matches[0].group(1), 
+        "commEnd": matches[-1].group(1)
+    }   
+
 # def generic_chunk_text_CODED(
 #     text: str, 
 #     chunk_size: int = 500, 

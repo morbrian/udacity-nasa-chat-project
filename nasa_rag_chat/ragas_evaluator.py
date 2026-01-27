@@ -9,6 +9,7 @@ import asyncio
 import argparse
 import yaml
 from pathlib import Path
+import time
 
 import rag_client
 import llm_client
@@ -116,15 +117,10 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             question, 
             n_docs
         )
+        contexts_list = docs_result["documents"][0]
+        metadatas = docs_result["metadatas"][0]
     except Exception as e:
         raise Exception(f"{test_id} Failed to retrieve documents: {e}")
-    try:
-        doc_ids = [metadata.get("doc_id") for metadata in docs_result["metadatas"][0]]
-        expanded_results = rag_client.get_adjacent_documents_for_ids(collection, doc_ids)
-        contexts_list = expanded_results["documents"]
-        metadatas = expanded_results["metadatas"]
-    except Exception as e:
-        raise Exception(f"{test_id} Failed to expand context with additional documents: {e}")
 
     context = rag_client.format_context(documents=contexts_list, metadatas=metadatas)
     
@@ -139,7 +135,6 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     except Exception as e:
         raise Exception(f"{test_id} Failed to query LLM with question {question}: {e}")
 
-    logger.info(f"{LOG_PREFIX} {test_id} Evaluate quality of answer {answer}")
     try:
         scores = evaluate_response_quality(
             question=question,
@@ -290,12 +285,16 @@ def main():
         sys.exit()
     
     try:
+        start_time = time.time()
         if args.test_cases:
             results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
             print_averages(results_bundle)
         else:
             results_bundle = evaluate_response_quality(question=args.question, answer=args.answer, contexts=args.contexts)
             display_evaluation_metrics(results_bundle)
+        end_time = time.time()
+        duration = end_time - start_time
+        logger.info(f"Evaluation completed in {duration:.2f} seconds")
     except Exception as e:
         log_error(logger, f"Failed to complete test cycle: {e}", e)
 

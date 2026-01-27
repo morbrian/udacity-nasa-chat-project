@@ -1,5 +1,5 @@
 import pytest
-from nasa_rag_chat.processors.text_generic import generic_chunk_text
+from nasa_rag_chat.processors.text_generic import generic_chunk_text, get_comm_bounds
 
 # --- Fixtures ---
 @pytest.fixture
@@ -94,6 +94,18 @@ def test_generic_chunk_text_terminates_at_end_of_string():
     last_chunk = chunks[-1]
     assert chunks.count(last_chunk) == 1
 
+def test_get_comm_bounds_start_and_end(sample_transcript):
+    """Ensure the start and end times are identified in a communication correctly."""
+    commTimes = get_comm_bounds(sample_transcript)
+
+    assert commTimes["commStart"] == "078:08:23" # verify start
+    assert commTimes["commEnd"] == "078:08:52" # verify end
+
+def test_get_comm_bounds_is_none_when_no_timestamps(sample_prose):
+    """Ensure None is returned when text has no timestamps."""
+    commTimes = get_comm_bounds(sample_prose)
+
+    assert commTimes is None
 
 
 @pytest.mark.parametrize("size, overlap", [

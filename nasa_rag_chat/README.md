@@ -104,7 +104,7 @@ A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabili
    python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
    
    # Launch chat interface
-   streamlit run chat.py
+   streamlit run nasa_rag_chat/chat.py
    ```
 
 
