@@ -41,7 +41,7 @@ References:
 """
 
 def generate_response(openai_key: str, user_message: str, context: str, 
-                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo", max_tokens=600) -> str:
+                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo", max_tokens=300) -> str:
     """Generate response using OpenAI with context"""
     
     # DONE: Define system prompt

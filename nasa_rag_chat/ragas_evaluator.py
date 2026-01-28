@@ -108,7 +108,7 @@ def evaluate_test_case(
         test_id="", 
         gen_model='gpt-3.5-turbo',
         eval_model='gpt-3.5-turbo',
-        max_tokens=600
+        max_tokens=300
     ) -> Dict[str, Any]:
     """
     Sends the question to the LLM and evalutes the response against ground_truth using a ragas evaluator.
@@ -176,7 +176,7 @@ def evaluate_test_case_bundle(
         include_adjacent=False, 
         gen_model='gpt-3.5-turbo',
         eval_model='gpt-3.5-turbo',
-        max_tokens=600
+        max_tokens=300
     ):
     """
     Reads test case data defined in the yaml formatted file specified by {test_cases_file}
@@ -300,7 +300,7 @@ def main():
     
     parser.add_argument('--gen-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used for response generation from LLM.")
     parser.add_argument('--eval-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used to evaluate response from LLM.")
-    parser.add_argument('--max-tokens', type=int, default=600, help="Max tokens of the response returned from LLM")
+    parser.add_argument('--max-tokens', type=int, default=300, help="Max tokens of the response returned from LLM")
     parser.add_argument('--n-docs', type=int, default=3, help="Number of retrieved document chunks to include with prompt sent to LLM.")
     parser.add_argument('--include-adjacent', type=bool, default=False, help="When true, RAG will include the previous and next document chunks for each of the retrieved docs, increasing the context data by 3x.")
 
