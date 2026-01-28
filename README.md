@@ -2,327 +2,202 @@
 
 A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabilities. Create a complete RAG pipeline from document processing to interactive chat interface.
 
-## 🎯 Learning Objectives
 
-By completing this project, you will learn to:
-- Build document embedding pipelines with ChromaDB and OpenAI
-- Implement RAG retrieval systems with semantic search
-- Create LLM client integrations with conversation management
-- Develop real-time evaluation systems using RAGAS metrics
-- Build interactive chat interfaces with Streamlit
-- Handle error scenarios and edge cases in production systems
+## Environment Setup 
 
-## 📁 Project Structure
+1. Setup Python Environment
 
-```
-/
-├── chat.py                 # Main Streamlit chat application (TODO-based)
-├── embedding_pipeline.py   # ChromaDB embedding pipeline (TODO-based)
-├── llm_client.py           # OpenAI LLM client wrapper (TODO-based)
-├── rag_client.py           # RAG system client (TODO-based)
-├── ragas_evaluator.py      # RAGAS evaluation metrics (TODO-based)
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.8+
-- OpenAI API key
-- Basic understanding of Python, APIs, and vector databases
-- Familiarity with machine learning concepts
-
-### Installation
-
-1. **Navigate to the project folder**:
    ```bash
-   cd project
-   ```
+   export PY_VERSION=3.13.0
 
-2. **Install dependencies**:
-   ```bash
+   # Set up Python version (if using pyenv)
+   pyenv versions | grep -q "$PY_VERSION" || pyenv install $PY_VERSION
+   pyenv local $PY_VERSION
+
+   # Create and activate virtual environment
+   python -m venv venv
+   source venv/bin/activate
+
+   # Install dependencies
    pip install -r requirements.txt
    ```
 
-3. **Set up your OpenAI API key**:
+2. Setup OpenAI API Key
+
+* Some parts of the project let you specify your key on the commandline or in the GUI.
+* Some parts require it to be available in the env var `OPENAI_API_KEY`
+* We support both Vocareum ("voc-") and standard ("sk-") OpenAI keys
+
    ```bash
-   export OPENAI_API_KEY="your-api-key-here"
+   export OPENAI_API_KEY="<your key>"
    ```
 
-## 📚 Learning Path
+## Load Data and Smoke Test System
 
-This project follows a structured learning approach where each file contains TODO comments guiding you through the implementation. Complete the files in this recommended order:
+1. Load the data using the embedding pipeline
 
-### **Phase 1: Core Infrastructure**
-
-#### 1. **LLM Client (`llm_client.py`)** - *Estimated Time: 2-3 hours*
-**What you'll learn:**
-- OpenAI Chat Completions API integration
-- System prompt engineering for domain expertise
-- Conversation history management
-- Context integration strategies
-- Model parameter tuning (temperature, max_tokens)
-
-**Key TODOs:**
-- Define system prompt for NASA expertise
-- Set context in messages
-- Add chat history management
-- Create OpenAI Client
-- Send request to OpenAI and return response
-
-#### 2. **RAG Client (`rag_client.py`)** - *Estimated 
-**What you'll learn:**
-- ChromaDB backend discovery and connection
-- Semantic search with metadata filtering
-- Document retrieval optimization
-- Context formatting for LLM consumption
-
-**Key TODOs:**
-- Discover available ChromaDB collections
-- Initialize RAG system with database connections
-- Implement document retrieval with optional filtering
-- Format retrieved documents into structured context
-
-#### 3. **Embedding Pipeline (`embedding_pipeline.py`)
-**What you'll learn:**
-- Document processing and text chunking strategies
-- OpenAI embeddings generation
-- ChromaDB collection management
-- Metadata extraction and organization
-- Batch processing and error handling
-- Command-line interface development
-
-**Key TODOs:**
-- Initialize OpenAI client and ChromaDB
-- Implement intelligent text chunking with overlap
-- Create document management methods
-- Build metadata extraction from file paths
-- Implement batch document processing
-- Create command-line interface
-
-### **Phase 2: Evaluation and Interface**
-
-#### 4. **RAGAS Evaluator (`ragas_evaluator.py`)** - 
-**What you'll learn:**
-- Response quality evaluation metrics
-- RAGAS framework integration
-- Multi-dimensional assessment (relevancy, faithfulness, precision)
-- Evaluation data structure management
-
-**Key TODOs:**
-- Create evaluator LLM and embeddings
-- Define evaluation metrics instances
-- Evaluate responses using multiple metrics
-- Return comprehensive evaluation results
-
-#### 5. **Chat Application (`chat.py`)** - *Estimated 
-**What you'll learn:**
-- Streamlit web application development
-- Real-time evaluation integration
-- User interface design for RAG systems
-- Session state management
-- Configuration and settings management
-
-**Key TODOs:**
-- Integrate all components (RAG, LLM, evaluation)
-- Build interactive chat interface
-- Implement real-time quality metrics display
-- Handle user configuration and backend selection
-
-## 🛠️ Implementation Guidelines
-
-### **TODO-Based Learning Approach**
-Each file contains strategically placed TODO comments that guide you through:
-1. **Understanding the purpose** of each function/method
-2. **Implementing core logic** step by step
-3. **Handling edge cases** and error scenarios
-4. **Integrating components** effectively
-
-### **Code Quality Standards**
-- Follow Python PEP 8 style guidelines
-- Add comprehensive error handling
-- Include informative logging statements
-- Write clear docstrings for all functions
-- Use type hints for better code clarity
-
-### **Testing Strategy**
-- Test each component individually before integration
-- Use small datasets for initial testing
-- Verify API connections before processing large batches
-- Test edge cases (empty files, network errors, invalid inputs)
-
-## 📊 Data Requirements
-
-### **Expected Data Structure**
-The system expects NASA document data organized in folders:
-```
-data/
-├── apollo11/           # Apollo 11 mission documents
-│   ├── *.txt          # Text files with mission data
-├── apollo13/           # Apollo 13 mission documents
-│   ├── *.txt          # Text files with mission data
-└── challenger/         # Challenger mission documents
-    ├── *.txt          # Text files with mission data
-```
-
-### **Supported Document Types**
-- Plain text files (.txt)
-- Mission transcripts
-- Technical documents
-- Audio transcriptions
-- Flight plans and procedures
-
-## 🧪 Testing Your Implementation
-
-### **Component Testing**
-
-1. **Test LLM Client**:
-   ```python
-   from llm_client import generate_response
-   response = generate_response(api_key, "What was Apollo 11?", "", [])
-   print(response)
-   ```
-
-2. **Test RAG Client**:
-   ```python
-   from rag_client import discover_chroma_backends
-   backends = discover_chroma_backends()
-   print(backends)
-   ```
-
-3. **Test Embedding Pipeline**:
    ```bash
-   python embedding_pipeline.py --openai-key YOUR_KEY --stats-only
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --update-mode replace --data-path ./data
    ```
 
-4. **Test Evaluation**:
-   ```python
-   from ragas_evaluator import evaluate_response_quality
-   scores = evaluate_response_quality("question", "answer", ["context"])
-   print(scores)
+2. **Test LLM Client**
+
+  **Example-1:** Asking questions with no context should always cause the LLM to admin a lack of knowldge.
+   ```bash
+   python nasa_rag_chat/llm_client.py --question 'Who were the crew members of the Apollo 13?'
+    
+    ...<also prints context and question as output>
+    RESPONSE: I'm sorry, but I do not have access to that information.
    ```
 
-### **Integration Testing**
+  **Example-2:** Asking a question related to a provided context should provide a reasonable response ONLY from the context even if its fictional.
+  * This test demonstrates the LLM can pull facts from the context.
+   ```bash
+   python nasa_rag_chat/llm_client.py --question 'Who were the crew members of the Apollo 13?' \
+      --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
+
+      ...<also prints context and question as output>
+      RESPONSE: The crew members of the Apollo 13 mission were Mickey Mouse as the Lead Pilot, Donald Duck as Number Two, and Walt Disney in the role of Medicine Man. 
+      The mission took place in 1713.
+   ```
+
+  **Example-3:** This next test demonstrates the LLM is able to recognize when a somewhat related question does not have an answer in the context.
+   * The answer is in this test acknowledges a lack of knowledge, but also seems to have let its own training data leak into the response 
+   when it hallucinates "The Apollo 13 did not take place in 1713", because the context clearly state that as a fact the LLM should take as truth.
+   ```bash
+   python nasa_rag_chat/llm_client.py --question 'Who did NASA select as the first person to walk on the moon and what year did the Apollo 3 mission take place?' \
+      --contexts "The Apollo 13 Mission is a historic achievment in space travel that took place in 1713. The Lead Pilot of the space craft was Mickey Mouse, supported by Donald Duck as Number Two and Walt Disney in the role of Medicine Man"
+
+      ...<also prints context and question as output>
+      RESPONSE: NASA did not select the first person to walk on the moon in the provided context. The Apollo 13 mission did not take place in 1713; it is not mentioned in the context.
+      Therefore, I cannot provide information on the year the Apollo 3 mission took place.
+   ```
+
+3. **Test RAG Client**
+
+   The command below 
+   ```bash
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --stats-only
+   ```
+
+4. **Test Evaluation**
+
+   This is a short smoke test of the RAGAS implementation, a deeper dive on a larger dataset follows in the next section of this README.md
+* This example only tests the evaluate_response_quality(..) function with the static text inputs.
+* The more general use case for the ragas_evaluator is to run a number of tests defined in a file like `test-cases.yaml`
+   ```bash
+   python nasa_rag_chat/ragas_evaluator.py \
+       --openai-key $OPENAI_API_KEY
+       --question "What is a common color for grass?" \
+       --answer "Grass is commonly green" \
+       --contexts "The most comon color of grass is green."
+   ```
+
+## **Integration Testing**
 
 1. **Run the complete pipeline**:
+
+   This will run the chatbot server at http://localhost:8501
+
    ```bash
    # Process documents
-   python embedding_pipeline.py --openai-key YOUR_KEY --data-path ./data
+   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
    
    # Launch chat interface
-   streamlit run chat.py
+   streamlit run nasa_rag_chat/chat.py
    ```
 
-## 🎓 Checkpoints
 
-### **Checkpoint 1: Basic Functionality**
-- [ ] LLM client generates responses
-- [ ] RAG client discovers ChromaDB backends
-- [ ] Embedding pipeline processes sample files
-- [ ] Evaluation system calculates basic metrics
+## Evaluator Deep Dive
 
-### **Checkpoint 2: Integration**
-- [ ] Components work together seamlessly
-- [ ] Chat interface loads and responds to queries
-- [ ] Real-time evaluation displays metrics
-- [ ] Error handling works correctly
+1. Run test cases from the provided data file `test-cases.yaml`
 
-### **Checkpoint 3: Advanced Features**
-- [ ] Mission-specific filtering works
-- [ ] Conversation history is maintained
-- [ ] Batch processing handles large datasets
-- [ ] Performance is acceptable for interactive use
+   ```bash
+   python nasa_rag_chat/ragas_evaluator.py --openai-key $OPENAI_API_KEY --test-cases ./test-cases.yaml
+   ```
 
-## 🚨 Common Challenges and Solutions
+Score improvement tactics.
+    
+   1. ✔️ Faithfulness > 0.8
+      
+      Initial poor scores (< 0.6) in faithfulness were a result of the LLM using its own training data and not our provided context.
+      
+      * Strategy: We lowered `temperature` to 0.0 so the LLM would focus on the context with fewer attempts to be creative.
+        
+      * Strategy: We adjusted our prompt instructions to use a Chain of Thought strategy that asked the LLM to start by looking at our context and building the response in steps.
+        
+      Second pass poor scores (< 0.8) in faithfulness were a result of our data simply not having enough overlap with the question being asked.
+        
+      * Strategy: We added a `data/apollo13/mission-report.txt` extracted from https://archive.org/stream/apollo-13-mission-report/apollo-13-mission-report_djvu.txt
 
-### **API Integration Issues**
-- **Problem**: OpenAI API key errors
-- **Solution**: Verify key is set correctly and has sufficient credits
+   2. ✔️ Relevancy > 0.8
+        
+      Relevancy generally had strong scores (>= 0.8) from the begining once we fixed some unintended truncation bugs in our code.
+            
+      * Strategy: We used an enrichment algorithm to add fully expanded acronyms and speaker names to the text to increase hit chance.
+        We also tried to break up any text generically by sentence, and for the case of the transcripts logs we also tried to ensure
+        each time based communication would not be broken up. While it was not always possible due to chunk size limitations
+        the overlap helped ensure the RAG query to ChromaDB was always finding something related to the question.
+    
+   3. Bleu
 
-### **ChromaDB Connection Issues**
-- **Problem**: Collection not found errors
-- **Solution**: Run embedding pipeline first to create collections
+   3. Rouge
 
-### **Memory and Performance Issues**
-- **Problem**: Out of memory during processing
-- **Solution**: Reduce batch sizes and chunk sizes
+   4. Context Precision
 
-### **Evaluation Errors**
-- **Problem**: RAGAS evaluation fails
-- **Solution**: Ensure all dependencies are installed and contexts are properly formatted
 
-## 📈 Success Metrics
+4. Test LLM with sample questions and context.
 
-Your implementation is successful when:
-1. **Functionality**: All components work individually and together
-2. **User Experience**: Chat interface is responsive and intuitive
-3. **Quality**: Responses are relevant and well-sourced
-4. **Evaluation**: Metrics provide meaningful quality assessment
-5. **Robustness**: System handles errors gracefully
-6. **Performance**: Response times are acceptable for interactive use
+Our prompt defined in `llm_client.py` guides the LLM to rely only on the context provided, but through experimentation
+it is clear that it still sometimes provides information from its own training data, which is not unexpected.
 
-## 🔧 Configuration Options
+The `llm_client.py` by itself does not perform RAG operations so it allows for some exploration of how the LLM behaves
+when the provided context is not consistent with what it learned in training.
 
-### **Embedding Pipeline**
-- Chunk size and overlap settings
-- Batch processing parameters
-- Update modes for existing documents
-- Embedding model selection
+Some example test scenarios (responses vary across runs for the same inputs):
 
-### **LLM Client**
-- Model selection (GPT-3.5-turbo, GPT-4)
-- Temperature and creativity settings
-- Maximum token limits
-- Conversation history length
+**Example-1:** When no context is provided on the commandline the LLM uses its own training data.
+```bash
+python nasa_rag_chat/llm_client.py --question "Who were the crew members of the Apollo 13?"
 
-### **RAG System**
-- Number of documents to retrieve
-- Mission-specific filtering options
-- Similarity thresholds
+RESPONSE: The crew members of the Apollo 13 mission were Jim Lovell, Fred Haise, and Jack Swigert [1].
 
-### **Evaluation System**
-- Metric selection and weighting
-- Evaluation frequency settings
-- Display preferences
+References:
+- [1] No Context
+```
 
-## 🏆 Extension Opportunities
+**Example-2:** When an insufficient context is provided the LLM will not make up an answer or use training data:
+```bash
+python nasa_rag_chat/llm_client.py --question "Who were the crew members of the Apollo 13?" --context "Nothing to see here"
 
-Once you complete the basic implementation, consider these enhancements:
+RESPONSE: I'm sorry, I cannot provide an answer as there is no relevant information provided in the context.
+```
 
-1. **Advanced Retrieval**: Implement hybrid search (semantic + keyword)
-2. **Multi-modal Support**: Add support for images and audio
-3. **Performance Optimization**: Add caching and parallel processing
-4. **Advanced Evaluation**: Implement custom metrics for domain-specific quality
-5. **Deployment**: Containerize and deploy to cloud platforms
-6. **Monitoring**: Add comprehensive logging and monitoring
-7. **Security**: Implement authentication and rate limiting
+**Example-3:** When a factually incorrect context is provided the LLM may trust it (sometimes):
+```bash
+python nasa_rag_chat/llm_client.py \
+    --question "Who were the crew members of the Apollo 13?" \
+    --context "Apollo 13 crew was comprised of Mickey Mouse, Donald Duck and Batman in the year 1922"
 
-## 📚 Resources
+RESPONSE: The Apollo 13 crew consisted of Jim Lovell, Jack Swigert, and Fred Haise [1]. 
 
-- [ChromaDB Documentation](https://docs.trychroma.com/)
-- [OpenAI API Documentation](https://platform.openai.com/docs)
-- [RAGAS Documentation](https://docs.ragas.io/)
-- [Streamlit Documentation](https://docs.streamlit.io/)
+Additional trivia: The Apollo 13 mission was the seventh crewed mission in the Apollo space program and was launched on April 11, 1970 [2].
 
-## 🤝 Getting Help
+References:
+- [1] Apollo 13 - NASA <timestamp>
+- [2] Apollo 13 Mission Overview - NASA <timestamp>
 
-If you encounter issues:
-1. Check the TODO comments for guidance
-2. Review error messages carefully
-3. Test components individually
-4. Verify API keys and dependencies
-5. Check data format and structure
-6. Review the completed implementation in `project_completed/` folder
+# DEVELOPER NOTE: In this sample, it actually does not respond with the answer from the provided context.
+#        I iterated on this for quite a while and found that while I could consistently get the LLM to acknowledge the absence of data in the context
+#        my prompts were very unreliable in getting the LLM to provide a response it knows is false. It's possible, just not easy and not consistent.
+```
 
-## 📝 Submission Guidelines
+5. asdf
 
-When submitting your completed project:
-1. Ensure all TODO items are implemented
-2. Test the complete workflow end-to-end
-3. Document any additional features or improvements you added
-4. Provide sample queries and expected responses
 
----
 
-**Good luck with your RAG system implementation!** This project will give you hands-on experience with modern AI application development, from data processing to user interface design. Take your time with each component and don't hesitate to experiment with different approaches and parameters.
+
+
+
+
+
