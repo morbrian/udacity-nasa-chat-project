@@ -33,6 +33,7 @@ import re
 from typing import Generator, Dict, Any
 from pprint import pprint
 
+from processors.text_transcript import AcronymExpander, TranscriptProcessor, get_acronym_lookup
 from processors.text_generic import generic_chunk_text, get_comm_bounds
 from services.openai import get_openai_client
 
@@ -130,110 +131,6 @@ class ChromaEmbeddingPipelineTextOnly:
         except Exception as e:
             log_error(logger, f'Failed to summarize text: {e}', e)
             raise
-
-
-    # def parse_transcript_document(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
-    #     """
-    #     Preprocess text with data_type=transcript and return dictionary of prepared data.
-
-    #     A transcript document is structured as follows:
-    #     1. Title page
-    #     2. INTRODUCTION
-    #     3. ACRONYM LIST
-    #     4. Transcript log
-    #       We have read that all NASA transcripts are formatted like the Apollo 13 example transcript we have.
-    #       time, speaker, and text. 
-    #       The time column consists of four two-digit pairs for days, hours, minutes, and seconds (e.g., 04 22 45 12). 
-    #       The speaker column indicates the source of a transmission; 
-    #       the text column contains the verbatim transcript of the communications.
-        
-    #     Args:
-    #         text: Text to process
-    #         metadata: Base metadata for the text
-            
-    #     Returns:
-    #         List of dictionaries with entries:
-    #           text: enriched text sized for use as embedding
-    #           metadata:
-    #             "token_count": len(chunk_tokens),
-    #             "position": numeric index into section of document,
-    #             "section": name of document section where the content came from
-    #     """
-    #     logger_prefix = self.get_metadata_log_prefix(metadata)
-    #     logger.info(f"{logger_prefix} Begin processing transcript")
-    #     chunk_size = self.parameters['chunk_size']
-    #     position_tracker = 0
-
-    #     # the transcript processor will help us produce enriched sentence strings with abbreviations filled in to increase search relevance
-    #     transcript_processor = TranscriptProcessor(acronym_lookups)
-
-    #     # Split text into sections of the transcript type of document.
-    #     title_text, intro_text, acronym_text, log_text = transcript_processor.parse_transcript_sections(text)
-
-    #     # build a dictionary representation of the acronyms we can use to enrich the logs during processing
-    #     logger.info(f"{logger_prefix} Build Acronym lookup table")
-    #     log_metadata = metadata | { "section": "transcript" }
-
-    #     if intro_text is not None or acronym_text is not None:
-    #         acronym_lookups = get_acronym_lookup(f"{intro_text}\n{acronym_text}")
-    #         acronym_expander = AcronymExpander(acronym_lookups)
-
-    #     chunks = []
-
-    #     # create title page chunk
-    #     title_summary = self.summarize_text(text=title_text, size=chunk_size)
-    #     logger.info(f"{logger_prefix} Extract Title: {title_summary}")
-    #     chunk = (
-    #         title_summary,
-    #         metadata | {
-    #             "section": "title",
-    #             "token_count": len(self.local_encoding.encode(title_summary)),
-    #             "position": 0
-    #         }
-    #     )
-    #     chunks.append(chunk)
-    #     position_tracker = len(chunks)
-
-    #     # do a generic chunking on the introduction text
-    #     logger.info(f"{logger_prefix} Extract Introduction")
-    #     intro_metadata = metadata | { "section": "introduction" }
-    #     intro_chunks = self.generic_chunk_text(
-    #         intro_text, 
-    #         intro_metadata, 
-    #         position_start=position_tracker,
-    #         chunk_size=self.parameters['chunk_size'],
-    #         chunk_overlap=self.parameters['chunk_overlap'],
-    #     )
-    #     chunks.extend(intro_chunks)
-    #     position_tracker = len(chunks)
-
-    #     # do a generic chunking on the acronyms section
-    #     logger.info(f"{logger_prefix} Extract Acronym text")
-    #     acronym_metadata = metadata | { "section": "acronymn" }
-    #     acronym_chunks = self.generic_chunk_text(
-    #         acronym_text, 
-    #         acronym_metadata, 
-    #         position_start=position_tracker,
-    #         chunk_size=self.parameters['chunk_size'],
-    #         chunk_overlap=self.parameters['chunk_overlap'],
-    #     )
-    #     chunks.extend(acronym_chunks)
-    #     position_tracker = len(chunks)
-
-    #     sentences = []
-    #     count = 0
-    #     for record in transcript_processor.process_transcript(log_text, log_metadata):
-    #         sentences.append(record.get("enriched_text"))
-    #         count += 1
-        
-    #     enriched_log_text = "\n".join(sentences)
-    #     transcript_chunks = self.generic_chunk_text(enriched_log_text, log_metadata, position_start=position_tracker, acronym_expander=acronym_expander)
-    #     chunks.extend(transcript_chunks)
-    #     position_tracker = len(chunks)
-
-    #     logger.info(f"{logger_prefix} Finished Processing Total of ({count}) Transcript Records")
-
-    #     return chunks
     
     def chunk_text(self, text: str, metadata: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
         """
@@ -248,25 +145,6 @@ class ChromaEmbeddingPipelineTextOnly:
         """
         chunk_size = self.parameters['chunk_size']
         chunk_overlap = self.parameters['chunk_overlap']
-
-        # transcript_processor = TranscriptProcessor()
-        
-        # # Split text into sections of the transcript type of document.
-        # _title_text, intro_text, acronym_text, _log_text = transcript_processor.parse_transcript_sections(text)
-
-        # if intro_text is not None or acronym_text is not None:
-        #     acronym_lookups = None
-        #     acronym_lookups = get_acronym_lookup(f"{intro_text}\n{acronym_text}")
-        #     acronym_expander = AcronymExpander(acronym_lookups)
-
-        # get the data_type so we can use an the most effective transform for the type
-        # data_type = metadata['data_type'] 
-        # if data_type == 'transcript':
-        #     return self.parse_transcript_document(text, metadata)
-        # else:
-        #     return self.generic_chunk_text(text=text, metadata=metadata)
-        
-        # chunks =  generic_chunk_text(text=text, metadata=metadata, acronym_expander=acronym_expander)
 
         chunks = generic_chunk_text(text=text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
 
@@ -284,6 +162,37 @@ class ChromaEmbeddingPipelineTextOnly:
             )
             for text, metadata in tuples
         ]
+
+        if metadata['data_type'] == 'transcript' and metadata['mission'] == 'apollo_13':
+            start_acronyms = time.time()
+            # we know how to extract acronyms from the apollo13 transcripts but not from other document types
+            try:
+                transcript_processor = TranscriptProcessor()
+                
+                # # Split text into sections of the transcript type of document.
+                _title_text, intro_text, acronym_text, _log_text = transcript_processor.parse_transcript_sections(text)
+
+                if intro_text is not None or acronym_text is not None:
+                    # this gets an acronym JSON by asking OpenAI to extract the acronyms from the introduction and acronym sections of the document.
+                    acronym_lookups = get_acronym_lookup(f"{intro_text}\n{acronym_text}")
+                    acronym_expander = AcronymExpander(acronym_lookups)
+                    tuples = [
+                        (
+                            text, 
+                            {
+                                **metadata, 
+                                **({"acronyms": json.dumps(filtered)} if (filtered := acronym_expander.filter_related_acronyms(text)) else {})
+                            }
+                        ) 
+                        for text, metadata in tuples
+                    ]
+            except Exception as e:
+                # the acronym expansion is optional so we just log a warning and move on
+                logger.warning(f"Failed to enrich {metadata.get('file_path', '')} data with acronyms: {e}")
+            
+            end_acronyms = time.time()
+            acronyms_duration = end_acronyms - start_acronyms
+            logger.info(f"Enriched {len(tuples)} metadatas with acronyms in {acronyms_duration} seconds.")
 
         return tuples
 
@@ -686,7 +595,6 @@ class ChromaEmbeddingPipelineTextOnly:
                 batch_tracker['ids'].append(doc_id)
                 batch_tracker['documents'].append(doc_text)
                 batch_tracker['metadatas'].append(doc_metadata)
-                # logger.debug(f"{logger_prefix} [doc_id({doc_id})] ADD {i}-of-{document_count} TO BATCH: as item-{batch_tracker['count']} in batch")
 
             # if the current batch is filled or we are on the final document
             # then add the batch to the vector db

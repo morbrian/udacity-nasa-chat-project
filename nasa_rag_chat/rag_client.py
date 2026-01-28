@@ -229,9 +229,10 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     
     # DONE: Initialize list with header text for context section
     mission_data = []
-    mission_data.append("\n### MISSION DATA SECTIONS")
+    mission_data.append("\n\n### MISSION DATA SECTIONS")
 
     all_acronyms = {}
+    
     # DONE: Loop through paired documents and their metadata using enumeration
     for i, (document, metadata) in enumerate(zip(documents, metadatas)):
         # DONE: Extract mission information from metadata with fallback value
@@ -239,16 +240,10 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         # DONE: Clean up mission name formatting (replace underscores, capitalize)
         mission = mission.replace("_", " ").capitalize()
 
-        # DONE: Extract source information from metadata with fallback value
-        source = metadata.get('source') or 'Source Unknown'
-
         # DONE: Extract category information from metadata with fallback value
         category = metadata.get('document_category') or "Category Unknown"
         # DONE: Clean up category name formatting (replace underscores, capitalize)
         category = category.replace("_", " ").capitalize()
-
-        # extract section
-        section = metadata.get('section') or 'Section Unknown'
  
         # DONE: Create formatted source header with index number and extracted information
         commStart, commEnd = metadata.get('commStart', ''), metadata.get('commEnd', '')
@@ -266,12 +261,23 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
         mission_data.append(truncated_text)
         mission_data.append("</context>\n")
 
+        # add to single list of all acronyms
+        stored_acronyms = metadata.get('acronyms') or None
+        if stored_acronyms is not None:
+            try:
+                acronym_mappings = json.loads(stored_acronyms)
+                all_acronyms |= (acronym_mappings or {})
+            except Exception as e:
+                logger.warning(f"Document {metadata.get('doc_id')} metadata has unparseable acronyms value: {stored_acronyms}")
+
     # DONE: Join all context parts with newlines and return formatted string
     all_mission_text = "\n".join(mission_data)
 
-    combined_context = all_mission_text
+    if all_acronyms:
+        acronym_text = format_acronyms(all_acronyms)
+        all_mission_text = f"\n{acronym_text}\n{all_mission_text}"
     
-    return combined_context
+    return all_mission_text
 
 
 def main():

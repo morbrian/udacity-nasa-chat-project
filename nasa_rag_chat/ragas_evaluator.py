@@ -98,7 +98,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], g
     return results
 
 
-def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, collection, n_docs=3, test_id="") -> Dict[str, Any]:
+def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, collection, n_docs=3, include_adjacent=False, test_id="") -> Dict[str, Any]:
     """
     Sends the question to the LLM and evalutes the response against ground_truth using a ragas evaluator.
     
@@ -113,9 +113,10 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
     logger.info(f"{LOG_PREFIX} {test_id} Retrieve documents for question({question})")
     try:
         docs_result = rag_client.retrieve_documents(
-            collection, 
-            question, 
-            n_docs
+            collection=collection, 
+            query=question, 
+            n_results=n_docs,
+            include_adjacent=include_adjacent
         )
         contexts_list = docs_result["documents"][0]
         metadatas = docs_result["metadatas"][0]
@@ -154,7 +155,7 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
 
     return record
 
-def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collection):
+def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collection, n_docs=3, include_adjacent=False):
     """
     Reads test case data defined in the yaml formatted file specified by {test_cases_file}
 
@@ -185,7 +186,15 @@ def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collect
             logger.info(f"{LOG_PREFIX} [{i}] Test Case {i} is missing ground_truth data")
             return
         logger.info(f"{LOG_PREFIX} [{i}] ...... test phase in progress ......\n")
-        results = evaluate_test_case(openai_api_key=openai_api_key, question=question, ground_truth=ground_truth, collection=collection, test_id=f"[{i}]")
+        results = evaluate_test_case(
+            openai_api_key=openai_api_key, 
+            question=question, 
+            ground_truth=ground_truth, 
+            collection=collection, 
+            n_docs=n_docs, 
+            include_adjacent=include_adjacent, 
+            test_id=f"[{i}]"
+        )
         logger.info(f"\n{LOG_PREFIX} [{i}] ...... test phase complete ......")
         results_bundle.append(results)
         logger.info(f"{LOG_PREFIX} [{i}] ❔ Question: {results.get('question', '')}")
@@ -256,13 +265,16 @@ def main():
     configure_logging_filename('ragas_evaluator.log')
 
     parser = argparse.ArgumentParser(description='RAG System Evaluator')
-    parser.add_argument('--test-cases', type=valid_file, help='Path to test cases file')
+    parser.add_argument('--test-cases', type=valid_file, help='Path to test cases file to run a bundle of test cases, mutually exclusive to the single test run of question/answer/contexts parameters.')
     parser.add_argument('--question', default='What is a common color for grass?', help='Question query for the LLM to answer')
     parser.add_argument('--answer', default='Grass is commonly green.', help='Answer we would expect from the LLM')
     parser.add_argument('--contexts', 
                         nargs="+", 
                         default=['The most common color of grass is green.'], 
                         help='Question query for the LLM to answer' )
+    
+    parser.add_argument('--n-docs', type=int, default=3, help="Number of retrieved document chunks to include with prompt sent to LLM.")
+    parser.add_argument('--include-adjacent', type=bool, default=False, help="When true, RAG will include the previous and next document chunks for each of the retrieved docs, increasing the context data by 3x.")
 
     parser.add_argument('--openai-key', type=valid_openai_api_key, required=True, help='OpenAI API key')
     parser.add_argument('--chroma-dir', type=valid_directory, default='./chroma_db_openai', help='ChromaDB persist directory')
@@ -287,10 +299,20 @@ def main():
     try:
         start_time = time.time()
         if args.test_cases:
-            results_bundle = evaluate_test_case_bundle(test_cases_file=args.test_cases, collection=collection, openai_api_key=args.openai_key)
+            results_bundle = evaluate_test_case_bundle(
+                test_cases_file=args.test_cases, 
+                collection=collection, 
+                openai_api_key=args.openai_key, 
+                n_docs=args.n_docs, 
+                include_adjacent=args.include_adjacent
+            )
             print_averages(results_bundle)
         else:
-            results_bundle = evaluate_response_quality(question=args.question, answer=args.answer, contexts=args.contexts)
+            results_bundle = evaluate_response_quality(
+                question=args.question, 
+                answer=args.answer, 
+                contexts=args.contexts
+            )
             display_evaluation_metrics(results_bundle)
         end_time = time.time()
         duration = end_time - start_time

@@ -38,7 +38,6 @@ The result must be well formed JSON with no other text formatting or markup.
             "content": "\n".join(clean_lines)
     }
 
-    logger.debug(f"USER_PROMPT: {user_prompt}")
     try:
         openai_client = get_openai_client()
         response = openai_client.chat.completions.create(
@@ -48,9 +47,6 @@ The result must be well formed JSON with no other text formatting or markup.
         )
 
         content = response.choices[0].message.content
-
-        logger.debug(f"ACRONYM CONTENT: {content}")
-
         json_data = json.loads(content)
 
         # remove unwanted characters like periods from the values
@@ -82,7 +78,7 @@ class AcronymExpander:
         expansion = self.mapping.get(word)
         return f"{word} ({expansion})"
 
-    def filter_related_acronyms(self, text: dict):
+    def filter_related_acronyms(self, text: str):
         """Extracts acronyms and definitions found in the text and returns them in a dictionary"""
         # findall returns a unique list of all matches. 
         found_keys = set(self._pattern.findall(text))

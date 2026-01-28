@@ -48,10 +48,10 @@ def initialize_rag_system(chroma_dir: str, collection_name: str):
         return None, False, str(e)
 
 def retrieve_documents(collection, query: str, n_results: int = 3, 
-                      mission_filter: Optional[str] = None) -> Optional[Dict]:
+                      mission_filter: Optional[str] = None, include_adjacent = False) -> Optional[Dict]:
     """Retrieve relevant documents from ChromaDB with optional filtering"""
     try:
-        return rag_client.retrieve_documents(collection, query, n_results, mission_filter)
+        return rag_client.retrieve_documents(collection, query, n_results, mission_filter, include_adjacent = include_adjacent)
     except Exception as e:
         st.error(f"Error retrieving documents: {e}")
         return None
@@ -164,10 +164,19 @@ def main():
             options=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"],
             help="Choose the OpenAI model for responses"
         )
+
+        # History Control
+        st.subheader("📋 History Control")
+        historyCount =st.slider("Message history to keep", 1, 100, 30)
         
         # Retrieval settings
         st.subheader("🔍 Retrieval Settings")
         n_docs = st.slider("Documents to retrieve", 1, 10, 3)
+        include_adjacent = st.checkbox(
+            "Include adjacent documents", 
+            value=False, 
+            help="Retrieves the document chunks adjacent to the first set of retrieved docs, increasing context size by 3x"
+        )
         
         # Evaluation settings
         st.subheader("📊 Evaluation Settings")
@@ -214,7 +223,8 @@ def main():
                 docs_result = retrieve_documents(
                     collection, 
                     prompt, 
-                    n_docs
+                    n_docs,
+                    include_adjacent=include_adjacent
                 )
                 
                 # Format context
@@ -247,6 +257,9 @@ def main():
         
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})
+        # Keep only the most recent messages
+        if len(st.session_state.messages) > historyCount:
+            st.session_state.messages = st.session_state.messages[-historyCount:]
         st.rerun()
 
 
