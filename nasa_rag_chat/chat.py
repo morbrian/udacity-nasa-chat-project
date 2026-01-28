@@ -62,10 +62,10 @@ def format_context(documents: List[str], metadatas: List[Dict]) -> str:
     return rag_client.format_context(documents, metadatas)
 
 def generate_response(openai_key, user_message: str, context: str, 
-                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo") -> str:
+                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo", max_tokens=600) -> str:
     """Generate response using OpenAI with context"""
     try:
-        return llm_client.generate_response(openai_key, user_message, context, conversation_history, model)
+        return llm_client.generate_response(openai_key, user_message, context, conversation_history, model, max_tokens=max_tokens)
     except Exception as e:
         return f"Error generating response: {e}"
 
@@ -164,6 +164,7 @@ def main():
             options=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"],
             help="Choose the OpenAI model for responses"
         )
+        max_tokens = st.slider("Max Tokens", 300, 1000, 600)
 
         # History Control
         st.subheader("📋 History Control")
@@ -241,7 +242,8 @@ def main():
                     prompt, 
                     context, 
                     st.session_state.messages[:-1],
-                    model_choice
+                    model_choice,
+                    max_tokens=max_tokens
                 )
                 st.markdown(response)
                 

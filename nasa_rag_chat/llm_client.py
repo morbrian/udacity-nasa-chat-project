@@ -41,7 +41,7 @@ References:
 """
 
 def generate_response(openai_key: str, user_message: str, context: str, 
-                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo") -> str:
+                     conversation_history: List[Dict], model: str = "gpt-3.5-turbo", max_tokens=600) -> str:
     """Generate response using OpenAI with context"""
     
     # DONE: Define system prompt
@@ -80,7 +80,7 @@ def generate_response(openai_key: str, user_message: str, context: str,
         model=model,
         messages=augmented_history,
         temperature=0, # keeping this low helps focus on the training docs. 
-        max_tokens=300 # TODO: keep it short while testing
+        max_tokens=max_tokens 
     )
 
     # DONE: Return response

@@ -29,7 +29,7 @@ except ImportError:
 
 LOG_PREFIX = "[RAGAS_EVALUATOR]"
 
-def evaluate_response_quality(question: str, answer: str, contexts: List[str], ground_truth: List[str] = None) -> Dict[str, float]:
+def evaluate_response_quality(question: str, answer: str, contexts: List[str], ground_truth: List[str] = None, model='gpt-3.5-turbo') -> Dict[str, float]:
     """Evaluate response quality using RAGAS metrics"""
     if not RAGAS_AVAILABLE:
         return {"error": "RAGAS not available"}
@@ -39,7 +39,7 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], g
 
     # DONE: Create evaluator LLM with model gpt-3.5-turbo
     evaluator_llm = LangchainLLMWrapper(ChatOpenAI(
-        model="gpt-3.5-turbo",
+        model=model,
         api_key=openai_api_key,
         base_url=base_url
     ))
@@ -98,7 +98,18 @@ def evaluate_response_quality(question: str, answer: str, contexts: List[str], g
     return results
 
 
-def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, collection, n_docs=3, include_adjacent=False, test_id="") -> Dict[str, Any]:
+def evaluate_test_case(
+        openai_api_key: str, 
+        question: str, 
+        ground_truth: str, 
+        collection, 
+        n_docs=3, 
+        include_adjacent=False, 
+        test_id="", 
+        gen_model='gpt-3.5-turbo',
+        eval_model='gpt-3.5-turbo',
+        max_tokens=600
+    ) -> Dict[str, Any]:
     """
     Sends the question to the LLM and evalutes the response against ground_truth using a ragas evaluator.
     
@@ -131,7 +142,9 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             openai_key=openai_api_key, 
             user_message=question,
             context=context, 
-            conversation_history=[]
+            conversation_history=[],
+            model=gen_model,
+            max_tokens=max_tokens
         )
     except Exception as e:
         raise Exception(f"{test_id} Failed to query LLM with question {question}: {e}")
@@ -141,7 +154,8 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
             question=question,
             answer=answer,
             contexts=[context],
-            ground_truth=[ground_truth]
+            ground_truth=[ground_truth],
+            model=eval_model
         )
     except Exception as e:
         raise Exception(f"{test_id} Failed to complete evaluation of test case for {question}: {e}")
@@ -155,7 +169,15 @@ def evaluate_test_case(openai_api_key: str, question: str, ground_truth: str, co
 
     return record
 
-def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collection, n_docs=3, include_adjacent=False):
+def evaluate_test_case_bundle(
+        openai_api_key: str, 
+        test_cases_file: str, 
+        collection, n_docs=3, 
+        include_adjacent=False, 
+        gen_model='gpt-3.5-turbo',
+        eval_model='gpt-3.5-turbo',
+        max_tokens=600
+    ):
     """
     Reads test case data defined in the yaml formatted file specified by {test_cases_file}
 
@@ -193,7 +215,10 @@ def evaluate_test_case_bundle(openai_api_key: str, test_cases_file: str, collect
             collection=collection, 
             n_docs=n_docs, 
             include_adjacent=include_adjacent, 
-            test_id=f"[{i}]"
+            test_id=f"[{i}]",
+            gen_model=gen_model,
+            eval_model=eval_model,
+            max_tokens=max_tokens
         )
         logger.info(f"\n{LOG_PREFIX} [{i}] ...... test phase complete ......")
         results_bundle.append(results)
@@ -273,6 +298,9 @@ def main():
                         default=['The most common color of grass is green.'], 
                         help='Question query for the LLM to answer' )
     
+    parser.add_argument('--gen-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used for response generation from LLM.")
+    parser.add_argument('--eval-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used to evaluate response from LLM.")
+    parser.add_argument('--max-tokens', type=int, default=600, help="Max tokens of the response returned from LLM")
     parser.add_argument('--n-docs', type=int, default=3, help="Number of retrieved document chunks to include with prompt sent to LLM.")
     parser.add_argument('--include-adjacent', type=bool, default=False, help="When true, RAG will include the previous and next document chunks for each of the retrieved docs, increasing the context data by 3x.")
 
@@ -304,14 +332,17 @@ def main():
                 collection=collection, 
                 openai_api_key=args.openai_key, 
                 n_docs=args.n_docs, 
-                include_adjacent=args.include_adjacent
+                include_adjacent=args.include_adjacent,
+                gen_model=args.gen_model,
+                eval_model=args.eval_model
             )
             print_averages(results_bundle)
         else:
             results_bundle = evaluate_response_quality(
                 question=args.question, 
                 answer=args.answer, 
-                contexts=args.contexts
+                contexts=args.contexts,
+                model=args.eval_model
             )
             display_evaluation_metrics(results_bundle)
         end_time = time.time()
