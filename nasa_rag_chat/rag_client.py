@@ -135,7 +135,16 @@ def initialize_rag_system(chroma_dir: str, collection_name: str):
             False,
             e
         )
-    
+
+def get_missions(collection):
+    if collection:
+        missions = collection.metadata.get("supported_missions", "")
+        print(f"returning missions {missions}")
+        return missions.split(",")
+    else:
+        print(f"return nothing")
+        return []
+
 def get_adjacent_documents_for_ids(collection, doc_ids):
     """Uses the provided meta"""
     all_expanded_ids = []

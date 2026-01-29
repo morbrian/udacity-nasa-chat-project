@@ -29,6 +29,8 @@ except ImportError:
 
 LOG_PREFIX = "[RAGAS_EVALUATOR]"
 
+DEFAULT_MISSION = 'apollo_13'
+
 def evaluate_response_quality(question: str, answer: str, contexts: List[str], ground_truth: List[str] = None, model='gpt-3.5-turbo') -> Dict[str, float]:
     """Evaluate response quality using RAGAS metrics"""
     if not RAGAS_AVAILABLE:
@@ -102,7 +104,8 @@ def evaluate_test_case(
         openai_api_key: str, 
         question: str, 
         ground_truth: str, 
-        collection, 
+        collection,
+        mission=DEFAULT_MISSION,
         n_docs=3, 
         include_adjacent=False, 
         test_id="", 
@@ -127,7 +130,8 @@ def evaluate_test_case(
             collection=collection, 
             query=question, 
             n_results=n_docs,
-            include_adjacent=include_adjacent
+            include_adjacent=include_adjacent,
+            mission_filter=mission
         )
         contexts_list = docs_result["documents"][0]
         metadatas = docs_result["metadatas"][0]
@@ -172,8 +176,10 @@ def evaluate_test_case(
 def evaluate_test_case_bundle(
         openai_api_key: str, 
         test_cases_file: str, 
-        collection, n_docs=3, 
-        include_adjacent=False, 
+        collection, 
+        mission=DEFAULT_MISSION,
+        n_docs=3, 
+        include_adjacent=False,
         gen_model='gpt-3.5-turbo',
         eval_model='gpt-3.5-turbo',
         max_tokens=300
@@ -212,7 +218,8 @@ def evaluate_test_case_bundle(
             openai_api_key=openai_api_key, 
             question=question, 
             ground_truth=ground_truth, 
-            collection=collection, 
+            collection=collection,
+            mission=mission,
             n_docs=n_docs, 
             include_adjacent=include_adjacent, 
             test_id=f"[{i}]",
@@ -297,6 +304,7 @@ def main():
                         nargs="+", 
                         default=['The most common color of grass is green.'], 
                         help='Question query for the LLM to answer' )
+    parser.add_argument('--mission', choices=["all", "apollo_11", "apollo_13"], default=DEFAULT_MISSION, help="Specify the mission to focus on when retrieving documents.")
     
     parser.add_argument('--gen-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used for response generation from LLM.")
     parser.add_argument('--eval-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used to evaluate response from LLM.")
@@ -330,8 +338,9 @@ def main():
             results_bundle = evaluate_test_case_bundle(
                 test_cases_file=args.test_cases, 
                 collection=collection, 
-                openai_api_key=args.openai_key, 
-                n_docs=args.n_docs, 
+                openai_api_key=args.openai_key,
+                mission=args.mission,
+                n_docs=args.n_docs,
                 include_adjacent=args.include_adjacent,
                 gen_model=args.gen_model,
                 eval_model=args.eval_model

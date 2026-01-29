@@ -88,7 +88,8 @@ class ChromaEmbeddingPipelineTextOnly:
         self.collection = self.chroma_client.get_or_create_collection(
             name=collection_name,
             metadata={
-                "embedding_model": embedding_model
+                "embedding_model": embedding_model,
+                "supported_missions": ""
             }
         )
     
@@ -242,7 +243,7 @@ class ChromaEmbeddingPipelineTextOnly:
             logger.error(f"Error updating document {doc_id}: {e}")
             return False
     
-    def delete_documents_by_source(self, source_pattern: str) -> int:
+    def delete_documents_by_source(self, source_pattern: str, mission: str = None) -> int:
         """
         Delete all documents from a specific source (useful for re-processing files)
         
@@ -255,19 +256,19 @@ class ChromaEmbeddingPipelineTextOnly:
         try:
             # Get all documents
             all_docs = self.collection.get()
-            
+
             # Find documents matching the source pattern
             ids_to_delete = []
             for i, metadata in enumerate(all_docs['metadatas']):
-                if source_pattern in metadata.get('source', ''):
+                if source_pattern in metadata.get('source', '') and (not mission or mission in metadata.get('mission', '')):
                     ids_to_delete.append(all_docs['ids'][i])
             
             if ids_to_delete:
                 self.collection.delete(ids=ids_to_delete)
-                logger.info(f"Deleted {len(ids_to_delete)} documents matching source pattern: {source_pattern}")
+                logger.info(f"Deleted {len(ids_to_delete)} documents matching source pattern: {source_pattern} and mission {mission}")
                 return len(ids_to_delete)
             else:
-                logger.info(f"No documents found matching source pattern: {source_pattern}")
+                logger.info(f"No documents found matching source pattern: {source_pattern} and mission {mission}")
                 return 0
                 
         except Exception as e:
@@ -365,7 +366,7 @@ class ChromaEmbeddingPipelineTextOnly:
         category = metadata.get('category', '')
         position = metadata.get('position', '')
         doc_id = f"{mission}:{data_type}:{category}:{source}:{position}"
-        # Format: mission_source_chunk_0001
+        # Format: mission:data_type:category:source:000
         return doc_id
     
     def process_text_file(self, file_path: Path) -> List[Tuple[str, Dict[str, Any]]]:
@@ -543,8 +544,9 @@ class ChromaEmbeddingPipelineTextOnly:
         
         if update_mode == 'replace':
             source = file_path.stem
-            removed_count = self.delete_documents_by_source(source)
-            logger.debug(f"Removed {removed_count} documents to replace {source}")
+            mission = self.extract_mission_from_path(file_path)
+            removed_count = self.delete_documents_by_source(source, mission=mission)
+            logger.debug(f"Removed {removed_count} documents to replace {mission}:{source}")
 
         # DONE: Process documents in batches
         batch_tracker = {
@@ -602,7 +604,7 @@ class ChromaEmbeddingPipelineTextOnly:
                 if (batch_tracker['count'] > 0):
                     build_batch_end_time = time.time()
                     build_batch_duration = build_batch_end_time - build_batch_start_time
-                    logger.info(f"Filled batch of size {batch_tracker['count']} in {build_batch_duration:.2f} seconds at document-{i} of total-{document_count}")
+                    logger.info(f"Filled batch of size {batch_tracker['count']} in {build_batch_duration:.2f} seconds at document({i+1}) of total({document_count})")
                     embeddings_call_start = time.time()
                     embeddings = self.get_embeddings(batch_tracker['documents'])
                     embeddings_call_end = time.time()
@@ -653,6 +655,7 @@ class ChromaEmbeddingPipelineTextOnly:
         # DONE: Get files to process
         text_files = self.scan_text_files_only(base_path)
         # DONE: Loop through each file
+        missions = set()
         for file_path in text_files:
             start = time.time()
             try:
@@ -670,6 +673,24 @@ class ChromaEmbeddingPipelineTextOnly:
                 stats['documents_added'] += document_stats['added']
                 stats['documents_updated'] += document_stats['updated']
                 stats['documents_skipped'] += document_stats['skipped']
+                
+                # identify mission name we just processed
+                mission_name = self.extract_mission_from_path(file_path)
+                # remember name so we can include it on the collection meta_data after all missions are processed.
+                missions.add(mission_name)
+
+                # capture the list of updated missions for the files processed in our stats
+                doc_missions = stats.get('missions', {})
+                current_mission = doc_missions.get(mission_name, {})
+                current_mission['files'] = current_mission.get('files', 0) + 1
+                current_mission['chunks'] = current_mission.get('chunks', 0) + len(documents)
+                current_mission['added'] = current_mission.get('added', 0) + document_stats['added']
+                current_mission['updated'] = current_mission.get('updated', 0) + document_stats['updated']
+                current_mission['skipped'] = current_mission.get('skipped', 0) + document_stats['skipped']
+
+                doc_missions[mission_name] = current_mission
+                stats['missions'] = doc_missions
+
             except Exception as e:
                 # DONE: Handle errors gracefully
                 stats['errors'] += 1
@@ -678,6 +699,13 @@ class ChromaEmbeddingPipelineTextOnly:
             end = time.time()
             duration = end - start
             logger.info(f"Finished processing {file_path} in {duration} sections")
+        
+        # get the existing list of missions in the collection and update it with the missions we just processed
+        existing_missions_str = self.collection.metadata.get("supported_missions", "")
+        mission_set = set(existing_missions_str.split(",")) if existing_missions_str else set()
+        mission_set.update(missions)
+        self.collection.modify(metadata={"supported_missions": ",".join(mission_set)})
+        
         return stats
     
     def get_collection_info(self) -> Dict[str, Any]:

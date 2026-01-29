@@ -8,7 +8,6 @@ and feedback collection for continuous improvement.
 
 import streamlit as st
 import os
-import json
 import pandas as pd
 
 import ragas_evaluator
@@ -116,6 +115,8 @@ def main():
         st.session_state.last_evaluation = None
     if "last_contexts" not in st.session_state:
         st.session_state.last_contexts = []
+    if "supported_missions" not in st.session_state: 
+        st.session_state.supported_missions = []
     
     # Sidebar for configuration
     with st.sidebar:
@@ -169,7 +170,15 @@ def main():
         # History Control
         st.subheader("📋 History Control")
         historyCount =st.slider("Message history to keep", 1, 100, 30)
-        
+
+        # Mission Selection
+        st.subheader("🧑‍🚀 Select Mission")
+        mission = st.selectbox(
+            "Mission", 
+            options=st.session_state.supported_missions,
+            help="Choose mission to chat about. Select 'all' to include all missions."
+        )
+
         # Retrieval settings
         st.subheader("🔍 Retrieval Settings")
         n_docs = st.slider("Documents to retrieve", 1, 10, 3)
@@ -191,11 +200,13 @@ def main():
     
     # Initialize RAG system
     with st.spinner("Initializing RAG system..."):
-
         collection, success, error = initialize_rag_system(
             selected_backend["directory"], 
             selected_backend["collection_name"]
         )
+        if not st.session_state.supported_missions:            
+            st.session_state.supported_missions = ['all'] + rag_client.get_missions(collection) if success else ['all']
+            st.rerun()
     
     if not success:
         st.error(f"Failed to initialize RAG system: {error}")
@@ -222,9 +233,10 @@ def main():
             with st.spinner("Searching documents and generating response..."):
                 # Retrieve relevant documents
                 docs_result = retrieve_documents(
-                    collection, 
-                    prompt, 
-                    n_docs,
+                    collection=collection, 
+                    query=prompt, 
+                    n_results=n_docs,
+                    mission_filter=mission,
                     include_adjacent=include_adjacent
                 )
                 
