@@ -47,7 +47,7 @@ def initialize_rag_system(chroma_dir: str, collection_name: str):
         return None, False, str(e)
 
 def retrieve_documents(collection, query: str, n_results: int = 3, 
-                      mission_filter: Optional[str] = None, include_adjacent = False) -> Optional[Dict]:
+                      mission_filter: Optional[str] = None, include_adjacent = True) -> Optional[Dict]:
     """Retrieve relevant documents from ChromaDB with optional filtering"""
     try:
         return rag_client.retrieve_documents(collection, query, n_results, mission_filter, include_adjacent = include_adjacent)
@@ -184,7 +184,7 @@ def main():
         n_docs = st.slider("Documents to retrieve", 1, 10, 3)
         include_adjacent = st.checkbox(
             "Include adjacent documents", 
-            value=False, 
+            value=True, 
             help="Retrieves the document chunks adjacent to the first set of retrieved docs, increasing context size by 3x"
         )
         

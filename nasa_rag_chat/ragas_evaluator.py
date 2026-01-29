@@ -310,7 +310,7 @@ def main():
     parser.add_argument('--eval-model', choices=["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo-preview"], default='gpt-3.5-turbo', help="Model used to evaluate response from LLM.")
     parser.add_argument('--max-tokens', type=int, default=300, help="Max tokens of the response returned from LLM")
     parser.add_argument('--n-docs', type=int, default=3, help="Number of retrieved document chunks to include with prompt sent to LLM.")
-    parser.add_argument('--include-adjacent', type=bool, default=False, help="When true, RAG will include the previous and next document chunks for each of the retrieved docs, increasing the context data by 3x.")
+    parser.add_argument('--include-adjacent', type=bool, default=True, help="When true, RAG will include the previous and next document chunks for each of the retrieved docs, increasing the context data by 3x.")
 
     parser.add_argument('--openai-key', type=valid_openai_api_key, required=True, help='OpenAI API key')
     parser.add_argument('--chroma-dir', type=valid_directory, default='./chroma_db_openai', help='ChromaDB persist directory')
