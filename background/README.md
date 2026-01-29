@@ -1,10 +1,10 @@
-# NASA RAG Chat Project 
+# NASA RAG Chat Project - Student Learning Version
 
-A Retrieval-Augmented Generation (RAG) system with real-time evaluation capabilities. Create a complete RAG pipeline from document processing to interactive chat interface.
+A hands-on learning project for building a Retrieval-Augmented Generation (RAG) system with real-time evaluation capabilities. This project teaches students to create a complete RAG pipeline from document processing to interactive chat interface.
 
 ## 🎯 Learning Objectives
 
-By completing this project, you will learn to:
+By completing this project, students will learn to:
 - Build document embedding pipelines with ChromaDB and OpenAI
 - Implement RAG retrieval systems with semantic search
 - Create LLM client integrations with conversation management
@@ -71,7 +71,7 @@ This project follows a structured learning approach where each file contains TOD
 - Create OpenAI Client
 - Send request to OpenAI and return response
 
-#### 2. **RAG Client (`rag_client.py`)** - *Estimated 
+#### 2. **RAG Client (`rag_client.py`)** - *Estimated Time: 3-4 hours*
 **What you'll learn:**
 - ChromaDB backend discovery and connection
 - Semantic search with metadata filtering
@@ -84,7 +84,7 @@ This project follows a structured learning approach where each file contains TOD
 - Implement document retrieval with optional filtering
 - Format retrieved documents into structured context
 
-#### 3. **Embedding Pipeline (`embedding_pipeline.py`)
+#### 3. **Embedding Pipeline (`embedding_pipeline.py`)** - *Estimated Time: 6-8 hours*
 **What you'll learn:**
 - Document processing and text chunking strategies
 - OpenAI embeddings generation
@@ -103,7 +103,7 @@ This project follows a structured learning approach where each file contains TOD
 
 ### **Phase 2: Evaluation and Interface**
 
-#### 4. **RAGAS Evaluator (`ragas_evaluator.py`)** - 
+#### 4. **RAGAS Evaluator (`ragas_evaluator.py`)** - *Estimated Time: 2-3 hours*
 **What you'll learn:**
 - Response quality evaluation metrics
 - RAGAS framework integration
@@ -116,7 +116,7 @@ This project follows a structured learning approach where each file contains TOD
 - Evaluate responses using multiple metrics
 - Return comprehensive evaluation results
 
-#### 5. **Chat Application (`chat.py`)** - *Estimated 
+#### 5. **Chat Application (`chat.py`)** - *Estimated Time: 4-5 hours*
 **What you'll learn:**
 - Streamlit web application development
 - Real-time evaluation integration
@@ -214,7 +214,7 @@ data/
    streamlit run chat.py
    ```
 
-## 🎓 Checkpoints
+## 🎓 Learning Checkpoints
 
 ### **Checkpoint 1: Basic Functionality**
 - [ ] LLM client generates responses
@@ -298,12 +298,13 @@ Once you complete the basic implementation, consider these enhancements:
 6. **Monitoring**: Add comprehensive logging and monitoring
 7. **Security**: Implement authentication and rate limiting
 
-## 📚 Resources
+## 📚 Learning Resources
 
 - [ChromaDB Documentation](https://docs.trychroma.com/)
 - [OpenAI API Documentation](https://platform.openai.com/docs)
 - [RAGAS Documentation](https://docs.ragas.io/)
 - [Streamlit Documentation](https://docs.streamlit.io/)
+- [RAG System Design Patterns](https://python.langchain.com/docs/use_cases/question_answering/)
 
 ## 🤝 Getting Help
 
@@ -320,8 +321,9 @@ If you encounter issues:
 When submitting your completed project:
 1. Ensure all TODO items are implemented
 2. Test the complete workflow end-to-end
-3. Document any additional features or improvements you added
-4. Provide sample queries and expected responses
+3. Include a brief report on challenges faced and solutions found
+4. Document any additional features or improvements you added
+5. Provide sample queries and expected responses
 
 ---
 
