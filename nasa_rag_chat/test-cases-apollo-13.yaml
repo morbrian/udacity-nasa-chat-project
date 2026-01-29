@@ -1,0 +1,42 @@
+
+test_cases:
+  - question: "What was the first verbal report of the Apollo 13 accident from the crew?"
+    ground_truth: |
+      At 055:55:19, Fred Haise said "Okay, Houston —" followed immediately by Jack Swigert at 055:55:20 stating, "I believe we've had a problem here." Jim Lovell then repeated at 055:55:35, "Houston, we've had a problem. We've had a MAIN B BUS UNDERVOLT."
+
+  - question: "What specific electrical issue was reported immediately after the 'large bang'?"
+    ground_truth: |
+      The crew reported a "MAIN B BUS UNDERVOLT." Fred Haise noted that there was a "pretty large bang associated with the CAUTION AND WARNING" and recalled that Main B had experienced an "amp spike on it once before."
+
+  - question: "What were the call signs used for the Command Service Module (CSM) and the Lunar Module (LM) when both were manned?"
+    ground_truth: |
+      According to the station operating procedures in the transcript, when both vehicles were manned, the call sign for the CSM was "Odyssey" and the call sign for the LM was "Aquarius."
+
+  - question: "What did Jim Lovell observe looking out the window shortly after the oxygen tank failure?"
+    ground_truth: |
+      At 056:09:07, Jim Lovell reported to Houston, "We are venting something out into the—into space. It's a gas of some sort."
+
+  - question: "Which oxygen tank quantity was reported as reading zero or 'fullscale high' following the incident?"
+    ground_truth: |
+      Fred Haise initially reported that O2 QUANTITY 2 was oscillating between 20 and 60 percent before going "fullscale high." Later, at 056:08:57, Jim Lovell confirmed, "our O2 quantity number 2 tank is reading zero."
+
+  - question: "What was the status of the center engine (engine 5) during the S-II boost phase?"
+    ground_truth: |
+      At 000:06:10, Jim Lovell asked, "what's the story on engine 5?" CapCom replied that they did not know why the "inboard out was early," but confirmed the other engines were still GO.
+
+  - question: "What instructions did Houston give regarding the fuel cells immediately after the undervolt was detected?"
+    ground_truth: |
+      At 056:00:35, Houston (CapCom Jack Lousma) instructed the crew to "attempt to reconnect fuel cell 1 to MAIN A and fuel cell 3 to MAIN B."
+
+  - question: "What did the crew report regarding the Service Module RCS helium and propellant indicators?"
+    ground_truth: |
+      The crew reported that for Service Module RCS HELIUM 1, "B is barber poled and D is barber poled." For HELIUM 2, "D is barber pole," and for SECONDARY PROPELLANTS, "A and C [are] barber pole."
+
+  - question: "What were the names and roles of the three Apollo 13 crew members identified in the transcript?"
+    ground_truth: |
+      The transcript identifies the crew as CDR (Commander) James A. Lovell, Jr., CMP (Command Module Pilot) John L. Swigert, Jr., and LMP (Lunar Module Pilot) Fred W. Haise, Jr.
+
+  - question: "What was the reported status of Fuel Cell 1 nitrogen and Fuel Cell 3 oxygen pressures?"
+    ground_truth: |
+      At 056:06:57, Fred Haise reported that "Fuel cell 1 nitrogen reads zero" and at 056:06:44, he reported that "2 Baker, which is 3 oxygen, says 0.6."
+      

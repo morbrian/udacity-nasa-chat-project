@@ -1,0 +1,40 @@
+test_cases:
+  - question: "What was the specific time of touchdown on the lunar surface?"
+    ground_truth: |
+      Lunar surface touchdown occurred at 102:45:40 ground elapsed time (GET) on July 20, 1969.
+
+  - question: "Who were the three crew members assigned to the Apollo 11 mission?"
+    ground_truth: |
+      The crew members were Neil A. Armstrong (Commander), Michael Collins (Command Module Pilot), and Edwin E. Aldrin, Jr. (Lunar Module Pilot).
+
+  - question: "What were the coordinates of the landing site in the Sea of Tranquility?"
+    ground_truth: |
+      The landing coordinates were 0 degrees 41 minutes 15 seconds north latitude and 23 degrees 26 minutes 0 seconds east longitude.
+
+  - question: "How much lunar sample material was collected during the EVA?"
+    ground_truth: |
+      The crew collected approximately 21.5 kilograms (47.4 pounds) of lunar rock and soil samples.
+
+  - question: "What was the duration of the total stay on the lunar surface?"
+    ground_truth: |
+      The total stay time on the lunar surface was 21 hours and 36 minutes.
+
+  - question: "Which scientific experiments were deployed as part of the EASEP?"
+    ground_truth: |
+      The Early Apollo Scientific Experiments Package (EASEP) included the Passive Seismic Experiment Package (PSEP) and the Laser Ranging Retro-Reflector (LRRR).
+
+  - question: "What was the total time Neil Armstrong spent outside on the lunar surface during the EVA?"
+    ground_truth: |
+      Neil Armstrong's total time outside (from hatch opening to hatch closing) was approximately 2 hours and 31 minutes.
+
+  - question: "What caused the 1201 and 1202 program alarms during the descent?"
+    ground_truth: |
+      The alarms were caused by an executive overflow in the Lunar Module guidance computer, resulting from the computer being asked to perform too many tasks at once due to the rendezvous radar being in the wrong position.
+
+  - question: "At what time did the Command Module splash down in the Pacific Ocean?"
+    ground_truth: |
+      Splashdown occurred at 195:18:35 ground elapsed time (GET) on July 24, 1969.
+
+  - question: "What was the name of the recovery ship for the Apollo 11 mission?"
+    ground_truth: |
+      The primary recovery ship was the USS Hornet (CVS-12).
