@@ -139,7 +139,7 @@ class TranscriptProcessor:
             Tuple(title page, introduction, acronym_list, transcript log)
         """
         # Pattern to find our specific section markers
-        markers = r'(INTRODUCTION|ACRONYM LIST|\d{3}:\d{2}:\d{2})'
+        markers = r'(INTRODUCTION|ACRONYM LIST|\d{3}:\d{2}:\d{2}|APOLLO 13 AIR-TO-GROUND VOICE TRANSCRIPTION)'
         
         # Split the text
         parts = re.split(markers, raw_text)
@@ -159,11 +159,11 @@ class TranscriptProcessor:
                 introduction_text = parts[i+1].strip()
             elif parts[i] == "ACRONYM LIST":
                 acronym_text = parts[i+1].strip()
-            elif re.match(r'\d{3}:\d{2}:\d{2}', parts[i]):
+            elif re.match(r'\d{3}:\d{2}:\d{2}', parts[i]) or re.match(r'APOLLO 13 AIR-TO-GROUND VOICE TRANSCRIPTION', parts[i]):
                 # Once we hit the first timestamp, we grab everything left
                 # Join the remaining parts back together to preserve the log
                 transcript_text = "".join(parts[i:])
-                break 
+                break
                 
         return title_page, introduction_text, acronym_text, transcript_text
 

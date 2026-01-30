@@ -13,7 +13,9 @@ def generic_chunk_text(
     
     custom_separators = [
         # 1. Structured Transcript Markers (Priority)
-        r"\n\d{3}:\d{2}:\d{2}\s+[A-Z]{2,4}\n", 
+        r"\n\d{3}:\d{2}:\d{2}\s+[A-Z]{2,4}\n", # original AS13_TEC.txt
+        r"\d{2}\s\d{2}\s\d{2}\s\d{2}\n[A-Z]{2,}", # new transcripts for both apollo 11,13
+        r"\[\d{2}:\d{2}\]\s+spk_\d+:", # new transcripts for challenger
         
         # 2. Markdown/Structural Headers
         "\n\n", 
@@ -40,18 +42,25 @@ def generic_chunk_text(
     return splitter.split_text(clean_text)
 
 # Compile ONCE at the module level
-TIMESTAMP_PATTERN = re.compile(r"(\d{3}:\d{2}:\d{2})\s+[A-Z]{2,4}")
+TIMESTAMP_PATTERN = re.compile(
+    r"("
+    r"\d{3}:\d{2}:\d{2}(?=\s+[A-Z]{2,4})"  # Format 1: 087:13:06
+    r"|"
+    r"(?<=\[)\d{2}:\d{2}(?=\])"            # Format 2: 03:23 (inside brackets)
+    r"|"
+    r"\d{2}\s\d{2}\s\d{2}\s\d{2}(?=\n[A-Z]{2,})" # Format 3: 00 00 10 04
+    r")"
+)
 
 def get_comm_bounds(text):
-    matches = list(TIMESTAMP_PATTERN.finditer(text))
+    """Return the first and last times found in the text block."""
+    matches = TIMESTAMP_PATTERN.findall(text)
+    
     if not matches:
         return None
     
-    # matches[0][1] gets the first capture group of the first match
-    # matches[-1][1] gets the first capture group of the last match
     return {
-        "commStart": matches[0].group(1), 
-        "commEnd": matches[-1].group(1)
-    }   
-
+        "commStart": matches[0], 
+        "commEnd": matches[-1]
+    }
 
