@@ -172,18 +172,3 @@ Score improvement tactics.
 
       We include Precision but we believe our implementation is incorrect as we only ever see 0.0 valued scores.
 
-## Implementation Report
-
-discuss pipeline
-
-chunk_size
-include_adjacent vs n_docs   (we settled on include_adjacent True)
-
-acronyms and acronym expansion (we decided not to enrich the embedding data)
-
-* discuss how we extract the acronyms from the data
-
-timestamps - discuss how we extract and add to metadata and in <context> headers so the LLM can use in Reference List
-
-
-
