@@ -13,6 +13,10 @@ Supported data sources:
 - Challenger transcribed audio data (text files only)
 """
 
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import json
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
@@ -684,7 +688,7 @@ class ChromaEmbeddingPipelineTextOnly:
 
             end = time.time()
             duration = end - start
-            logger.info(f"Finished processing {file_path} in {duration} sections")
+            logger.info(f"Finished processing {file_path} in {duration} seconds")
         
         # get the existing list of missions in the collection and update it with the missions we just processed
         existing_missions_str = self.collection.metadata.get("supported_missions", "")
