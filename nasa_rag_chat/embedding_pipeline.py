@@ -13,25 +13,15 @@ Supported data sources:
 - Challenger transcribed audio data (text files only)
 """
 
-
-import sys
 import json
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 import chromadb
-from chromadb.config import Settings
-import openai
-from openai import OpenAI
-import hashlib
 import time
 from datetime import datetime
 import argparse
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 
-import tiktoken
-import re
-from typing import Generator, Dict, Any
-from pprint import pprint
+from typing import Dict, Any
 
 from processors.text_transcript import AcronymExpander, TranscriptProcessor, get_acronym_lookup
 from processors.text_generic import generic_chunk_text, get_comm_bounds
@@ -80,9 +70,6 @@ class ChromaEmbeddingPipelineTextOnly:
 
         # DONE: Initialize ChromaDB client
         self.chroma_client = chromadb.PersistentClient(path=chroma_persist_directory)
-
-        # create a compatible encoder to use when chunking documents
-        self.local_encoding = tiktoken.encoding_for_model(embedding_model)
         
         # DONE: Create or get collection
         self.collection = self.chroma_client.get_or_create_collection(
@@ -124,9 +111,8 @@ class ChromaEmbeddingPipelineTextOnly:
             )
 
             summary_text = response.choices[0].message.content
-            token_check = self.local_encoding.encode(summary_text)
-            if (len(token_check) > size):
-                logger.warning(f'Content summary created by OpenAI exceeds the requested {size} tokens at {len(token_check)} tokens instead')
+            if (len(summary_text) > size):
+                logger.warning(f'Content summary created by OpenAI exceeds the requested {size} characters at {len(summary_text)} characters instead')
 
             return summary_text
         except Exception as e:
