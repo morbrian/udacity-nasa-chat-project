@@ -98,7 +98,7 @@ about the missions even when we failed to provide the answer in the context.
 * The more general use case for the ragas_evaluator is to run a number of tests defined in a file like `test-cases-apollo-13.yaml`
    ```bash
    python nasa_rag_chat/ragas_evaluator.py \
-       --openai-key $OPENAI_API_KEY
+       --openai-key $OPENAI_API_KEY \
        --question "What is a common color for grass?" \
        --answer "Grass is commonly green" \
        --contexts "The most comon color of grass is green."
@@ -106,14 +106,11 @@ about the missions even when we failed to provide the answer in the context.
 
 ## **Integration Testing With Browser**
 
-1. **Run the complete pipeline**:
+1. **Use the Chat Application**:
 
    This will run the chatbot server at http://localhost:8501
 
    ```bash
-   # Process documents
-   python nasa_rag_chat/embedding_pipeline.py --openai-key $OPENAI_API_KEY --data-path ./data
-   
    # Launch chat interface
    streamlit run nasa_rag_chat/chat.py
    ```
@@ -174,6 +171,19 @@ Score improvement tactics.
    4. Context Precision
 
       We include Precision but we believe our implementation is incorrect as we only ever see 0.0 valued scores.
+
+## Implementation Report
+
+discuss pipeline
+
+chunk_size
+include_adjacent vs n_docs   (we settled on include_adjacent True)
+
+acronyms and acronym expansion (we decided not to enrich the embedding data)
+
+* discuss how we extract the acronyms from the data
+
+timestamps - discuss how we extract and add to metadata and in <context> headers so the LLM can use in Reference List
 
 
 
